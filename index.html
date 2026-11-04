@@ -44,8 +44,18 @@ button.g{background:transparent;color:var(--mu);border:1px solid var(--bd);paddi
 .ok{color:var(--ac)}.warn{color:var(--ac2)}
 ul{padding-left:18px;margin:6px 0}
 </style>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0b7a3b">
 </head>
-<body>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .catch(error => console.error("Erro:", error));
+  });
+}
+</script>
+ <body>
 <header><div class="logo">⚽</div><h1 id="ttl">FutPro<small>Carreira · Rotina · Plano</small></h1></header>
 <nav id="nav"></nav>
 <main id="v"></main>
