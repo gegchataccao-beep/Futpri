@@ -55,7 +55,10 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
- <body>
+<button id="installBtn" style="display:none; padding:12px 20px; background:#0b7a3b; color:white; border:0; border-radius:10px; font-weight:bold;">
+  📲 INSTALAR FUTPRO
+</button>
+  <body>
 <header><div class="logo">⚽</div><h1 id="ttl">FutPro<small>Carreira · Rotina · Plano</small></h1></header>
 <nav id="nav"></nav>
 <main id="v"></main>
@@ -252,5 +255,23 @@ function plano(){var p=S.perfil,now=hoje(),idade=+p.idade||0,peso=+p.peso||0,doe
  return h}
 nav();draw();if(S.perfil.nome)$("ttl").firstChild.nodeValue=S.perfil.nome;
 </script>
-</body>
+<script>
+let installPrompt;
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  document.getElementById("installBtn").style.display = "block";
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+  if (!installPrompt) return;
+
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  document.getElementById("installBtn").style.display = "none";
+});
+</script>
+  </body>
 </html>
