@@ -47,18 +47,9 @@ ul{padding-left:18px;margin:6px 0}
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0b7a3b">
 </head>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
-      .catch(error => console.error("Erro:", error));
-  });
-}
-</script>
-<button id="installBtn" style="display:none; padding:12px 20px; background:#0b7a3b; color:white; border:0; border-radius:10px; font-weight:bold;">
-  📲 INSTALAR FUTPRO
-</button>
-  <body>
+<body>
+<button id="installBtn" style="display:none;padding:12px 20px;background:#0b7a3b;color:white;border:0;border-radius:10px;font-weight:bold;margin:12px;">📲 INSTALAR FUTPRO</button>
+
 <header><div class="logo">⚽</div><h1 id="ttl">FutPro<small>Carreira · Rotina · Plano</small></h1></header>
 <nav id="nav"></nav>
 <main id="v"></main>
@@ -66,7 +57,12 @@ if ("serviceWorker" in navigator) {
 var TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["rotina","Rotina"],["plano","Plano"]];
 var S={perfil:{nome:"",pos:"",pe:"",idade:"",clube:""},clubes:[],jogos:[],zona:[],rotina:[],cfg:{jogoMax:120,acorda:"06:00",dorme:"22:00"}};
 var tab="perfil",tm=null;
-try{var r=localStorage.getItem("futpro");if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+try{var r=localStorage.getItem("futpro");if(r){var saved=JSON.parse(r);if(saved&&typeof saved==="object")S=Object.assign(S,saved);}}catch(e){console.warn("Não foi possível ler os dados guardados.",e);}
+S.perfil=Object.assign({nome:"",pos:"",pe:"",idade:"",clube:"",sec:[],lado:"",pe2:"",alt:"",peso:"",pais:"",social:"",cron:"",foto:"",doente:false,doenteDesde:"",recuperadoEm:"",at:{vel:5,res:5,pas:5,fin:5,def:5,aer:5}},S.perfil||{});
+S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at||{});
+["clubes","jogos","zona","rotina","metas"].forEach(function(k){if(!Array.isArray(S[k]))S[k]=[];});
+S.metas=S.metas||[];
+S.cfg=Object.assign({jogoMax:120,acorda:"06:00",dorme:"22:00"},S.cfg||{});
 function sv(){try{localStorage.setItem("futpro",JSON.stringify(S));}catch(e){}}
 function $(i){return document.getElementById(i)}
 function uid(){return Math.random().toString(36).slice(2,9)}
@@ -95,7 +91,19 @@ function vPerfil(){var p=S.perfil,all=stats(S.jogos);
  '<div class="card"><h2>Cópia de segurança</h2><button class="g" onclick="exp()">Exportar dados (JSON)</button> <button class="g" onclick="imp()">Importar</button><p class="muted">Os dados ficam guardados neste navegador.</p></div>'}
 function svPerfil(){S.perfil={nome:val("pn"),pos:val("pp"),pe:val("pe"),idade:val("pi"),clube:S.perfil.clube};sv();$("ttl").firstChild.nodeValue=S.perfil.nome?S.perfil.nome:"FutPro";alert("Perfil guardado")}
 function exp(){var a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(S));a.download="futpro.json";a.click()}
-function imp(){var t=prompt("Cola aqui o JSON exportado:");if(!t)return;try{S=Object.assign(S,JSON.parse(t));sv();draw()}catch(e){alert("JSON inválido")}}
+function imp(){
+ var t=prompt("Cola aqui o JSON exportado:");if(!t)return;
+ try{
+  var data=JSON.parse(t);
+  if(!data||typeof data!=="object"||Array.isArray(data))throw new Error("Formato inválido");
+  S=Object.assign(S,data);
+  S.perfil=Object.assign({nome:"",pos:"",pe:"",idade:"",clube:"",sec:[],lado:"",pe2:"",alt:"",peso:"",pais:"",social:"",cron:"",foto:"",doente:false,doenteDesde:"",recuperadoEm:"",at:{}},S.perfil||{});
+  S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at||{});
+  ["clubes","jogos","zona","rotina","metas"].forEach(function(k){if(!Array.isArray(S[k]))S[k]=[];});
+  S.cfg=Object.assign({jogoMax:120,acorda:"06:00",dorme:"22:00"},S.cfg||{});
+  sv();draw();alert("Dados importados com sucesso.");
+ }catch(e){alert("Não foi possível importar: ficheiro JSON inválido ou incompatível.");}
+}
 
 function vCarreira(){
  var h='<div class="card"><h2>Adicionar clube</h2><div class="grid"><div><label>País</label><input id="cp" placeholder="Moçambique"></div><div><label>Clube</label><input id="cn"></div><div><label>Liga / divisão</label><input id="cl"></div><div><label>Camisola nº</label><input id="cj" type="number"></div></div><button class="b" onclick="addClube()">Adicionar clube</button><p class="muted">Clubes com poucos dados públicos (ex.: Moçambique): o calendário é preenchido por ti na aba Jogos.</p></div>';
@@ -139,7 +147,7 @@ function addZona(){if(!val("zd"))return;S.zona.push({id:uid(),data:val("zd"),adv
 var CAT=[["sono",/dorm|sono|deit|acord|levant/i,"#6c63ff"],["banho",/banho|duche|ducha/i,"#2db7f5"],["treino",/treino|gin[aá]sio|corrida|gym|cardio|for[cç]a|t[eé]cnic/i,"#2ee67a"],["alimentação",/comer|almo[cç]o|jantar|pequeno|lanche|refei|caf[eé]/i,"#f5a623"],["jogos",/jogo|fifa|ps\d|consola|playstation|videojogo|efootball/i,"#e056fd"],["estudo",/estud|aula|escola|instituto|trabalho/i,"#ff7675"],["recuperação",/descans|alongam|recuper|massag|gelo|sesta/i,"#00cec9"]];
 function cls(n){for(var i=0;i<CAT.length;i++)if(CAT[i][1].test(n))return{c:CAT[i][0],k:CAT[i][2]};return{c:"outro",k:"#8fa398"}}
 function banhoTipo(n){return /gelad/i.test(n)?"gelado (10 a 15 °C, 2 a 3 min)":/frio|fria/i.test(n)?"frio (15 a 20 °C, 3 a 5 min)":/quente/i.test(n)?"quente (36 a 38 °C, 5 a 8 min)":""}
-function segs(r){var a=t2m(r.ini),b=t2m(r.fim);return b>a?[[a,b]]:[[a,1440],[0,b]]}
+function segs(r){if(!r||!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(r.ini||"")||!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(r.fim||""))return [];var a=t2m(r.ini),b=t2m(r.fim);return b>a?[[a,b]]:[[a,1440],[0,b]]}
 function busy(){var o=[];S.rotina.forEach(function(r){segs(r).forEach(function(s){o.push(s)})});return o.sort(function(a,b){return a[0]-b[0]})}
 function free(){var o=busy(),f=[],c=0;o.forEach(function(s){if(s[0]>c)f.push([c,s[0]]);c=Math.max(c,s[1])});if(c<1440)f.push([c,1440]);return f}
 function vRotina(){var h='<div class="card"><h2>Adicionar atividade</h2><div class="grid"><div><label>O que fazes</label><input id="ra" placeholder="dormir, banho gelado, treino…"></div><div><label>Início</label><input id="ri" type="time" value="06:00"></div><div><label>Fim</label><input id="rf" type="time" value="07:00"></div></div><button class="b" onclick="addRot()">Adicionar</button><p class="muted">A atividade é reconhecida pelo nome e o horário é classificado como ocupado.</p></div>';
@@ -147,7 +155,7 @@ function vRotina(){var h='<div class="card"><h2>Adicionar atividade</h2><div cla
  var fr=free();h+='<p><b class="ok">Livre:</b> '+(fr.length?fr.map(function(f){return m2t(f[0])+" – "+(f[1]==1440?"24:00":m2t(f[1]))}).join(" · "):"nenhum")+'</p></div><div class="card"><h2>Atividades</h2>';
  S.rotina.slice().sort(function(a,b){return t2m(a.ini)-t2m(b.ini)}).forEach(function(r){var c=cls(r.nome),bt=c.c=="banho"?banhoTipo(r.nome):"";h+='<div class="row"><div><b>'+esc(r.nome)+'</b> <span class="tag" style="border-color:'+c.k+'">'+c.c+'</span><br><span class="muted">'+r.ini+' – '+r.fim+(bt?" · banho "+bt:"")+'</span></div><button class="g" onclick="del(\'rotina\',\''+r.id+'\')">✕</button></div>'});
  return h+(S.rotina.length?'':'<p class="muted">Sem atividades.</p>')+'</div>'}
-function addRot(){var n=val("ra").trim();if(!n)return;var a=val("ri"),b=val("rf");if(a==b)return;var nr={id:uid(),nome:n,ini:a,fim:b},ov=false;busy().forEach(function(s){segs(nr).forEach(function(q){if(q[0]<s[1]&&q[1]>s[0])ov=true})});
+function addRot(){var n=val("ra").trim();if(!n)return;var a=val("ri"),b=val("rf");if(!a||!b||a==b){alert("Indica um horário de início e fim diferentes.");return;}var nr={id:uid(),nome:n,ini:a,fim:b},ov=false;busy().forEach(function(s){segs(nr).forEach(function(q){if(q[0]<s[1]&&q[1]>s[0])ov=true})});
  if(ov&&!confirm("Esse horário colide com outra atividade. Adicionar mesmo assim?"))return;S.rotina.push(nr);sv();draw()}
 
 /* plano automático */
@@ -175,7 +183,7 @@ function gen(){var c=S.cfg={acorda:val("pa"),dorme:val("pd"),jogoMax:+val("pj")|
 var POSS=["Guarda-redes","Defesa central","Lateral direito","Lateral esquerdo","Médio defensivo","Médio centro","Médio ofensivo","Extremo direito","Extremo esquerdo","Avançado"];
 var DN=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 S.perfil=Object.assign({nome:"",pos:"",sec:[],lado:"",pe:"",pe2:"",idade:"",alt:"",peso:"",pais:"",social:"",cron:"",foto:"",doente:false,doenteDesde:"",recuperadoEm:"",at:{vel:5,res:5,pas:5,fin:5,def:5,aer:5}},S.perfil);
-S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at);S.metas=S.metas||[];
+S.perfil.sec=Array.isArray(S.perfil.sec)?S.perfil.sec:[];S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at||{});S.metas=Array.isArray(S.metas)?S.metas:[];
 TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["metas","Metas"],["rotina","Rotina"],["plano","Plano"]];
 function draw(){clearInterval(tm);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,metas:vMetas,rotina:vRotina,plano:vPlano}[tab];$("v").innerHTML=f();if(tab=="jogos")tick()}
 function I(l,id,v,t){return '<div><label>'+l+'</label><input id="'+id+'" type="'+(t||"text")+'" value="'+esc(v)+'"></div>'}
@@ -255,23 +263,39 @@ function plano(){var p=S.perfil,now=hoje(),idade=+p.idade||0,peso=+p.peso||0,doe
  return h}
 nav();draw();if(S.perfil.nome)$("ttl").firstChild.nodeValue=S.perfil.nome;
 </script>
-<script>
-let installPrompt;
 
-window.addEventListener("beforeinstallprompt", (event) => {
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js")
+      .catch(function (error) { console.error("Erro ao registar o Service Worker:", error); });
+  });
+}
+</script>
+<script>
+let installPrompt = null;
+const installButton = document.getElementById("installBtn");
+
+window.addEventListener("beforeinstallprompt", function (event) {
   event.preventDefault();
   installPrompt = event;
-  document.getElementById("installBtn").style.display = "block";
+  if (installButton) installButton.style.display = "block";
 });
 
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if (!installPrompt) return;
+if (installButton) {
+  installButton.addEventListener("click", async function () {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    installButton.style.display = "none";
+  });
+}
 
-  installPrompt.prompt();
-  await installPrompt.userChoice;
+window.addEventListener("appinstalled", function () {
   installPrompt = null;
-  document.getElementById("installBtn").style.display = "none";
+  if (installButton) installButton.style.display = "none";
 });
 </script>
-  </body>
+</body>
 </html>
