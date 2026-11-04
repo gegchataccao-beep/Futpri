@@ -1,49 +1,31 @@
-const CACHE_NAME = "futpro-v1";
+var VERSAO = 'futpro-v5';
+var FICHEIROS = ['./', './index.html', './manifest.json'];
 
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./manifest.json"
-];
-
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache =>
-      cache.addAll(FILES_TO_CACHE)
-    )
-  );
-
-  self.skipWaiting();
+self.addEventListener('install', function (e) {
+  e.waitUntil(caches.open(VERSAO).then(function (c) { return c.addAll(FICHEIROS); }));
 });
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
+self.addEventListener('activate', function (e) {
+  e.waitUntil(
+    caches.keys().then(function (ks) {
+      return Promise.all(ks.filter(function (k) { return k !== VERSAO; }).map(function (k) { return caches.delete(k); }));
+    }).then(function () { return self.clients.claim(); })
   );
-
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+self.addEventListener('message', function (e) {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response.ok) {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache =>
-            cache.put(event.request, copy)
-          );
-        }
-        return response;
-      })
-      .catch(() => caches.match(event.request))
+self.addEventListener('fetch', function (e) {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request).then(function (r) {
+      var copia = r.clone();
+      caches.open(VERSAO).then(function (c) { c.put(e.request, copia); });
+      return r;
+    }).catch(function () {
+      return caches.match(e.request).then(function (m) { return m || caches.match('./index.html'); });
+    })
   );
 });
