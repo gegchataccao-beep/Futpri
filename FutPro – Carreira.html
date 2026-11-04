@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FutPro – Carreira</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f3f6f4;--card:#fff;--tx:#0f1f17;--mu:#5b6b62;--ac:#0a9f4f;--ac2:#f5a623;--bd:#d9e2dc;--bad:#d64545}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1410;--card:#13211a;--tx:#e8f2ec;--mu:#8fa398;--ac:#2ee67a;--ac2:#ffc247;--bd:#223529;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0b1410;--card:#13211a;--tx:#e8f2ec;--mu:#8fa398;--ac:#2ee67a;--ac2:#ffc247;--bd:#223529;--bad:#ff6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background-image:repeating-linear-gradient(90deg,transparent 0 60px,rgba(46,230,122,.035) 60px 120px)}
+header{padding:18px 16px 8px;display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--ac),#066b34);display:grid;place-items:center;font-size:22px}
+h1{font-size:20px;margin:0}h1 small{display:block;font-size:12px;color:var(--mu);font-weight:400}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--bd)}
+nav button{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--mu);padding:8px 14px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--ac);color:#04210f;border-color:var(--ac)}
+main{padding:14px 12px 40px;max-width:900px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 10px}
+.grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button.b{background:var(--ac);color:#04210f;border:0;padding:10px 16px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px}
+button.g{background:transparent;color:var(--mu);border:1px solid var(--bd);padding:6px 10px;border-radius:8px;font:inherit;font-size:12px;cursor:pointer}
+.stats{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(95px,1fr))}
+.st{background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.st b{display:block;font-size:22px;color:var(--ac)}.st span{font-size:11px;color:var(--mu)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--bd);flex-wrap:wrap}
+.row:first-of-type{border-top:0}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);color:var(--mu)}
+.cd{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.cd div{background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;min-width:64px;text-align:center}
+.cd b{font-size:26px;display:block;color:var(--ac2)}.cd span{font-size:11px;color:var(--mu)}
+.bar{position:relative;height:38px;border-radius:10px;background:var(--bg);border:1px solid var(--bd);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;opacity:.9}
+.ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-top:3px}
+.pitch{height:120px;border-radius:12px;border:2px solid var(--ac);position:relative;background:repeating-linear-gradient(90deg,rgba(46,230,122,.08) 0 30px,transparent 30px 60px);margin-bottom:10px}
+.pitch:before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--ac)}
+.pitch:after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;border:2px solid var(--ac);border-radius:50%;transform:translate(-50%,-50%)}
+.muted{color:var(--mu);font-size:13px}
+.ok{color:var(--ac)}.warn{color:var(--ac2)}
+ul{padding-left:18px;margin:6px 0}
+</style>
+</head>
+<body>
+<header><div class="logo">⚽</div><h1 id="ttl">FutPro<small>Carreira · Rotina · Plano</small></h1></header>
+<nav id="nav"></nav>
+<main id="v"></main>
+<script>
+var TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["rotina","Rotina"],["plano","Plano"]];
+var S={perfil:{nome:"",pos:"",pe:"",idade:"",clube:""},clubes:[],jogos:[],zona:[],rotina:[],cfg:{jogoMax:120,acorda:"06:00",dorme:"22:00"}};
+var tab="perfil",tm=null;
+try{var r=localStorage.getItem("futpro");if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+function sv(){try{localStorage.setItem("futpro",JSON.stringify(S));}catch(e){}}
+function $(i){return document.getElementById(i)}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function t2m(t){var p=t.split(":");return +p[0]*60+ +p[1]}
+function m2t(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+function f1(n){return (Math.round(n*100)/100).toFixed(2)}
+function fd(s){var d=new Date(s);return d.toLocaleDateString("pt-PT",{day:"2-digit",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}
+function nav(){$("nav").innerHTML=TABS.map(function(t){return '<button class="'+(tab==t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")}
+function go(t){tab=t;nav();draw();window.scrollTo(0,0)}
+function del(k,id){S[k]=S[k].filter(function(x){return x.id!=id});sv();draw()}
+function val(i){var e=$(i);return e?e.value:""}
+
+/* estatísticas */
+function stats(l){var p=l.filter(function(j){return j.jogado}),o={j:p.length,min:0,g:0,a:0,n:0,nn:0};
+ p.forEach(function(j){o.min+=+j.min||0;o.g+=+j.gols||0;o.a+=+j.ass||0;if(j.nota){o.n+=+j.nota;o.nn++}});
+ o.ga=o.g+o.a;o.gpj=o.j?o.g/o.j:0;o.apj=o.j?o.a/o.j:0;o.gapj=o.j?o.ga/o.j:0;o.nota=o.nn?o.n/o.nn:0;o.g90=o.min?o.g*90/o.min:0;return o}
+function stHtml(o){var c=[["Jogos",o.j],["Minutos",o.min],["Golos",o.g],["Assist.",o.a],["G+A",o.ga],["Golos/jogo",f1(o.gpj)],["Assist./jogo",f1(o.apj)],["G/A por jogo",f1(o.gapj)],["Golos/90'",f1(o.g90)],["Nota média",o.nn?f1(o.nota):"–"]];
+ return '<div class="stats">'+c.map(function(x){return '<div class="st"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>'}).join("")+'</div>'}
+
+/* views */
+function draw(){clearInterval(tm);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,rotina:vRotina,plano:vPlano}[tab];$("v").innerHTML=f();if(tab=="jogos")tick()}
+function vPerfil(){var p=S.perfil,all=stats(S.jogos);
+ return '<div class="card"><h2>O teu perfil</h2><div class="pitch"></div><div class="grid"><div><label>Nome</label><input id="pn" value="'+esc(p.nome)+'"></div><div><label>Posição</label><select id="pp">'+["","Guarda-redes","Defesa central","Lateral","Médio defensivo","Médio","Extremo","Avançado"].map(function(x){return '<option'+(p.pos==x?" selected":"")+'>'+x+'</option>'}).join("")+'</select></div><div><label>Pé preferido</label><select id="pe">'+["","Direito","Esquerdo","Ambos"].map(function(x){return '<option'+(p.pe==x?" selected":"")+'>'+x+'</option>'}).join("")+'</select></div><div><label>Idade</label><input id="pi" type="number" value="'+esc(p.idade)+'"></div></div><button class="b" onclick="svPerfil()">Guardar perfil</button></div>'+
+ '<div class="card"><h2>Carreira profissional (clubes reais)</h2>'+stHtml(all)+'</div>'+
+ '<div class="card"><h2>Cópia de segurança</h2><button class="g" onclick="exp()">Exportar dados (JSON)</button> <button class="g" onclick="imp()">Importar</button><p class="muted">Os dados ficam guardados neste navegador.</p></div>'}
+function svPerfil(){S.perfil={nome:val("pn"),pos:val("pp"),pe:val("pe"),idade:val("pi"),clube:S.perfil.clube};sv();$("ttl").firstChild.nodeValue=S.perfil.nome?S.perfil.nome:"FutPro";alert("Perfil guardado")}
+function exp(){var a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(S));a.download="futpro.json";a.click()}
+function imp(){var t=prompt("Cola aqui o JSON exportado:");if(!t)return;try{S=Object.assign(S,JSON.parse(t));sv();draw()}catch(e){alert("JSON inválido")}}
+
+function vCarreira(){
+ var h='<div class="card"><h2>Adicionar clube</h2><div class="grid"><div><label>País</label><input id="cp" placeholder="Moçambique"></div><div><label>Clube</label><input id="cn"></div><div><label>Liga / divisão</label><input id="cl"></div><div><label>Camisola nº</label><input id="cj" type="number"></div></div><button class="b" onclick="addClube()">Adicionar clube</button><p class="muted">Clubes com poucos dados públicos (ex.: Moçambique): o calendário é preenchido por ti na aba Jogos.</p></div>';
+ h+='<div class="card"><h2>Os teus clubes</h2>';
+ if(!S.clubes.length)h+='<p class="muted">Ainda sem clubes.</p>';
+ S.clubes.forEach(function(c){var s=stats(S.jogos.filter(function(j){return j.club==c.id}));
+  h+='<div class="row"><div><b>'+esc(c.nome)+'</b> <span class="tag">'+esc(c.pais)+'</span> <span class="tag">'+esc(c.liga||"liga n/d")+'</span><br><span class="muted">'+(c.plantel?"No plantel · nº "+esc(c.num||"–"):"Fora do plantel")+' · '+s.j+' jogos · '+s.g+' G · '+s.a+' A</span></div><div><button class="g" onclick="plantel(\''+c.id+'\')">'+(c.plantel?"Sair":"Entrar no plantel")+'</button> <button class="g" onclick="sel(\''+c.id+'\')">'+(S.perfil.clube==c.id?"✓ Atual":"Selecionar")+'</button> <button class="g" onclick="del(\'clubes\',\''+c.id+'\')">✕</button></div></div>'});
+ return h+'</div>'}
+function addClube(){var n=val("cn").trim();if(!n)return;S.clubes.push({id:uid(),pais:val("cp"),nome:n,liga:val("cl"),num:val("cj"),plantel:false});sv();draw()}
+function plantel(id){S.clubes.forEach(function(c){if(c.id==id)c.plantel=!c.plantel});sv();draw()}
+function sel(id){S.perfil.clube=id;sv();draw()}
+function cur(){return S.clubes.filter(function(c){return c.id==S.perfil.clube})[0]}
+
+function gForm(p,extra){return '<div class="grid"><div><label>Data e hora</label><input id="'+p+'d" type="datetime-local"></div><div><label>Adversário</label><input id="'+p+'a"></div><div><label>Competição</label><input id="'+p+'c"></div>'+extra+'</div>'}
+function gStats(p){return '<div class="grid" style="margin-top:8px"><div><label>Resultado (ex. 2-1)</label><input id="'+p+'r"></div><div><label>Minutos</label><input id="'+p+'m" type="number" max="130"></div><div><label>Golos</label><input id="'+p+'g" type="number"></div><div><label>Assistências</label><input id="'+p+'s" type="number"></div><div><label>Nota (0-10)</label><input id="'+p+'n" type="number" step="0.1" max="10"></div></div>'}
+function vJogos(){var c=cur();if(!c)return '<div class="card"><p>Seleciona um clube na aba Carreira.</p></div>';
+ var l=S.jogos.filter(function(j){return j.club==c.id}).sort(function(a,b){return new Date(a.data)-new Date(b.data)}),nx=l.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()})[0];
+ var h='<div class="card"><h2>'+esc(c.nome)+' · Próximo jogo</h2>'+(nx?'<p style="margin:0">vs <b>'+esc(nx.adv)+'</b> '+(nx.casa?"(casa)":"(fora)")+' · '+fd(nx.data)+'</p><div class="cd" id="cd"></div><div id="prep"></div>':'<p class="muted">Sem jogos futuros. Adiciona abaixo.</p>')+'</div>';
+ h+='<div class="card"><h2>Estatísticas no clube</h2>'+stHtml(stats(l))+'</div>';
+ h+='<div class="card"><h2>Adicionar jogo ao calendário</h2>'+gForm("j",'<div><label>Local</label><select id="jh"><option value="1">Casa</option><option value="0">Fora</option></select></div><div><label>Posição neste jogo</label><select id="jp"><option value="">Posição principal</option>'+POSS.map(function(x){return '<option>'+x+'</option>'}).join("")+'</select></div>')+'<button class="b" onclick="addJogo()">Adicionar jogo</button></div>';
+ h+='<div class="card"><h2>Calendário e resultados</h2>';
+ l.forEach(function(j){h+='<div class="row"><div><b>'+esc(j.adv)+'</b> <span class="tag">'+esc(j.comp||"jogo")+'</span> <span class="tag">'+(j.casa?"Casa":"Fora")+'</span><br><span class="muted">'+fd(j.data)+(j.jogado?' · '+esc(j.res||"–")+' · '+(j.min||0)+"' · "+(j.gols||0)+'G '+(j.ass||0)+'A · nota '+(j.nota||"–"):'')+'</span></div><div><button class="g" onclick="edJogo(\''+j.id+'\')">'+(j.jogado?"Editar":"Registar")+'</button> <button class="g" onclick="del(\'jogos\',\''+j.id+'\')">✕</button></div></div>'});
+ return h+(l.length?'':'<p class="muted">Sem jogos.</p>')+'<div id="ed"></div></div>'}
+function addJogo(){var c=cur();if(!val("jd")||!val("ja").trim())return;S.jogos.push({id:uid(),club:c.id,data:val("jd"),adv:val("ja"),comp:val("jc"),casa:val("jh")=="1",posJ:val("jp"),jogado:false});sv();draw()}
+function edJogo(id){var j=S.jogos.filter(function(x){return x.id==id})[0];$("ed").innerHTML='<hr><h2>Registar desempenho: '+esc(j.adv)+'</h2>'+gStats("e")+'<button class="b" onclick="svJogo(\''+id+'\')">Guardar</button>';
+ ["r:res","m:min","g:gols","s:ass","n:nota"].forEach(function(x){var p=x.split(":");$("e"+p[0]).value=j[p[1]]||""})}
+function svJogo(id){S.jogos.forEach(function(j){if(j.id==id){j.res=val("er");j.min=+val("em")||0;j.gols=+val("eg")||0;j.ass=+val("es")||0;j.nota=+val("en")||0;j.jogado=true}});sv();draw()}
+function tick(){var c=cur();if(!c)return;var nx=S.jogos.filter(function(j){return j.club==c.id&&!j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0];if(!nx)return;
+ function u(){var d=new Date(nx.data)-new Date();if(d<0){draw();return}var s=Math.floor(d/1000),dd=Math.floor(s/86400),hh=Math.floor(s%86400/3600),mm=Math.floor(s%3600/60),ss=s%60,e=$("cd");if(!e)return;
+  e.innerHTML=[[dd,"dias"],[hh,"horas"],[mm,"min"],[ss,"seg"]].map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join("");
+  var H=d/3600000,t=H>48?["Treino normal; sono de 8 h","Hidratação constante"]:H>24?["Carga reduzida; carboidratos nas refeições","Análise do adversário","Preparar equipamento"]:H>3?["Sono de 8 a 9 h","Hidratar: 2 L até ao jogo","Visualização tática 15 min"]:["Refeição leve concluída","Aquecimento dinâmico 20 min","Foco e respiração 5 min"];
+  $("prep").innerHTML='<b class="warn">Preparação agora</b><ul>'+t.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul>'}
+ u();tm=setInterval(u,1000)}
+
+function vZona(){var s=stats(S.zona),h='<div class="card"><h2>Jogos da zona (não contam para o profissional)</h2>'+stHtml(s)+'</div><div class="card"><h2>Adicionar jogo da zona</h2>'+gForm("z",'<div><label>Local</label><input id="zl"></div>')+gStats("z2")+'<button class="b" onclick="addZona()">Guardar</button></div><div class="card"><h2>Histórico</h2>';
+ S.zona.slice().sort(function(a,b){return new Date(b.data)-new Date(a.data)}).forEach(function(j){h+='<div class="row"><div><b>'+esc(j.adv)+'</b> <span class="tag">zona</span><br><span class="muted">'+fd(j.data)+' · '+esc(j.res||"–")+' · '+j.min+"' · "+j.gols+'G '+j.ass+'A · nota '+(j.nota||"–")+'</span></div><button class="g" onclick="del(\'zona\',\''+j.id+'\')">✕</button></div>'});
+ return h+(S.zona.length?'':'<p class="muted">Sem jogos.</p>')+'</div>'}
+function addZona(){if(!val("zd"))return;S.zona.push({id:uid(),data:val("zd"),adv:val("za")||"Zona",comp:val("zc"),res:val("z2r"),min:+val("z2m")||0,gols:+val("z2g")||0,ass:+val("z2s")||0,nota:+val("z2n")||0,jogado:true});sv();draw()}
+
+/* rotina: deteção automática */
+var CAT=[["sono",/dorm|sono|deit|acord|levant/i,"#6c63ff"],["banho",/banho|duche|ducha/i,"#2db7f5"],["treino",/treino|gin[aá]sio|corrida|gym|cardio|for[cç]a|t[eé]cnic/i,"#2ee67a"],["alimentação",/comer|almo[cç]o|jantar|pequeno|lanche|refei|caf[eé]/i,"#f5a623"],["jogos",/jogo|fifa|ps\d|consola|playstation|videojogo|efootball/i,"#e056fd"],["estudo",/estud|aula|escola|instituto|trabalho/i,"#ff7675"],["recuperação",/descans|alongam|recuper|massag|gelo|sesta/i,"#00cec9"]];
+function cls(n){for(var i=0;i<CAT.length;i++)if(CAT[i][1].test(n))return{c:CAT[i][0],k:CAT[i][2]};return{c:"outro",k:"#8fa398"}}
+function banhoTipo(n){return /gelad/i.test(n)?"gelado (10 a 15 °C, 2 a 3 min)":/frio|fria/i.test(n)?"frio (15 a 20 °C, 3 a 5 min)":/quente/i.test(n)?"quente (36 a 38 °C, 5 a 8 min)":""}
+function segs(r){var a=t2m(r.ini),b=t2m(r.fim);return b>a?[[a,b]]:[[a,1440],[0,b]]}
+function busy(){var o=[];S.rotina.forEach(function(r){segs(r).forEach(function(s){o.push(s)})});return o.sort(function(a,b){return a[0]-b[0]})}
+function free(){var o=busy(),f=[],c=0;o.forEach(function(s){if(s[0]>c)f.push([c,s[0]]);c=Math.max(c,s[1])});if(c<1440)f.push([c,1440]);return f}
+function vRotina(){var h='<div class="card"><h2>Adicionar atividade</h2><div class="grid"><div><label>O que fazes</label><input id="ra" placeholder="dormir, banho gelado, treino…"></div><div><label>Início</label><input id="ri" type="time" value="06:00"></div><div><label>Fim</label><input id="rf" type="time" value="07:00"></div></div><button class="b" onclick="addRot()">Adicionar</button><p class="muted">A atividade é reconhecida pelo nome e o horário é classificado como ocupado.</p></div>';
+ h+='<div class="card"><h2>Linha do dia (24 h)</h2><div class="bar">'+S.rotina.map(function(r){var k=cls(r.nome).k;return segs(r).map(function(s){return '<i style="left:'+s[0]/14.4+'%;width:'+(s[1]-s[0])/14.4+'%;background:'+k+'"></i>'}).join("")}).join("")+'</div><div class="ticks"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>';
+ var fr=free();h+='<p><b class="ok">Livre:</b> '+(fr.length?fr.map(function(f){return m2t(f[0])+" – "+(f[1]==1440?"24:00":m2t(f[1]))}).join(" · "):"nenhum")+'</p></div><div class="card"><h2>Atividades</h2>';
+ S.rotina.slice().sort(function(a,b){return t2m(a.ini)-t2m(b.ini)}).forEach(function(r){var c=cls(r.nome),bt=c.c=="banho"?banhoTipo(r.nome):"";h+='<div class="row"><div><b>'+esc(r.nome)+'</b> <span class="tag" style="border-color:'+c.k+'">'+c.c+'</span><br><span class="muted">'+r.ini+' – '+r.fim+(bt?" · banho "+bt:"")+'</span></div><button class="g" onclick="del(\'rotina\',\''+r.id+'\')">✕</button></div>'});
+ return h+(S.rotina.length?'':'<p class="muted">Sem atividades.</p>')+'</div>'}
+function addRot(){var n=val("ra").trim();if(!n)return;var a=val("ri"),b=val("rf");if(a==b)return;var nr={id:uid(),nome:n,ini:a,fim:b},ov=false;busy().forEach(function(s){segs(nr).forEach(function(q){if(q[0]<s[1]&&q[1]>s[0])ov=true})});
+ if(ov&&!confirm("Esse horário colide com outra atividade. Adicionar mesmo assim?"))return;S.rotina.push(nr);sv();draw()}
+
+/* plano automático */
+function vPlano(){var c=S.cfg,h='<div class="card"><h2>Parâmetros</h2><div class="grid"><div><label>Acordar</label><input id="pa" type="time" value="'+c.acorda+'"></div><div><label>Dormir</label><input id="pd" type="time" value="'+c.dorme+'"></div><div><label>Máx. jogos na zona / dia (min)</label><input id="pj" type="number" value="'+c.jogoMax+'"></div></div><button class="b" onclick="gen()">Gerar plano completo</button></div><div id="pl"></div>';return h}
+function gen(){var c=S.cfg={acorda:val("pa"),dorme:val("pd"),jogoMax:+val("pj")||0};sv();
+ var w=t2m(c.acorda),sl=t2m(c.dorme),cur0=w,fr=free().map(function(f){return[Math.max(f[0],w),Math.min(f[1],sl)]}).filter(function(f){return f[1]-f[0]>=20}),pl=[],has=function(c0){return S.rotina.some(function(r){return cls(r.nome).c==c0})};
+ function put(nome,dur,pref,cat){for(var i=0;i<fr.length;i++){var f=fr[i],st=Math.max(f[0],pref||0);if(f[1]-st>=dur){pl.push([st,st+dur,nome,cat]);if(st>f[0]){fr.splice(i+1,0,[st+dur,f[1]]);f[1]=st}else f[0]=st+dur;return true}}return false}
+ var nx=S.jogos.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0],hj=nx&&(new Date(nx.data)-new Date())<36e5*30;
+ pl.push([w,w+10,"Acordar, 500 ml de água, mobilidade leve","recuperação"]);pl.push([sl-45,sl,"Rotina de sono: sem ecrãs, alongamento leve, respiração","recuperação"]);
+ fr=fr.map(function(f){return[f[0]+(f[0]==w?10:0),Math.min(f[1],sl-45)]});
+ if(!has("alimentação")){put("Pequeno-almoço: ovos, aveia, fruta",30,w+10,"alimentação");put("Almoço: arroz/massa, proteína, legumes",45,720,"alimentação");put("Lanche pré-treino: banana e pão",20,930,"alimentação");put("Jantar: proteína, legumes, hidratos moderados",45,1140,"alimentação")}
+ if(hj){put("Aquecimento e ativação (jogo próximo)",30,900,"treino");put("Visualização tática",20,0,"treino")}
+ else{put("Treino físico: força e potência",75,960,"treino");put("Treino técnico: passe, finalização, controlo",60,540,"treino");put("Treino aeróbio/intervalado",40,600,"treino")}
+ put("Recuperação: alongamento e rolo de espuma",25,1020,"recuperação");
+ if(!has("banho"))put("Banho gelado 2 a 3 min (10 a 15 °C) após o treino",15,1050,"banho");
+ if(c.jogoMax>0)put("Jogos na zona (limite "+c.jogoMax+" min)",Math.min(c.jogoMax,150),1170,"jogos");
+ S.rotina.forEach(function(r){segs(r).forEach(function(s){pl.push([s[0],s[1],r.nome+" (rotina)",cls(r.nome).c])})});
+ pl.sort(function(a,b){return a[0]-b[0]});
+ var col={};CAT.forEach(function(x){col[x[0]]=x[2]});
+ var h='<div class="card"><h2>Plano do dia'+(hj?' · dia de jogo próximo':'')+'</h2>';
+ pl.forEach(function(p){h+='<div class="row"><div><span class="tag" style="border-color:'+(col[p[3]]||"#8fa398")+'">'+p[3]+'</span> <b>'+esc(p[2])+'</b></div><span class="muted">'+m2t(p[0])+' – '+m2t(p[1])+'</span></div>'});
+ var sh=(((t2m(c.acorda)-sl)%1440)+1440)%1440/60;h+='<p class="muted">Sono planeado: '+f1(sh)+' h '+(sh<8?'<span class="warn">(abaixo de 8 h)</span>':'<span class="ok">(adequado)</span>')+'</p></div>';$("pl").innerHTML=h}
+</script><script>
+/* ===== v2: perfil completo, metas, saúde e plano automático ===== */
+var POSS=["Guarda-redes","Defesa central","Lateral direito","Lateral esquerdo","Médio defensivo","Médio centro","Médio ofensivo","Extremo direito","Extremo esquerdo","Avançado"];
+var DN=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+S.perfil=Object.assign({nome:"",pos:"",sec:[],lado:"",pe:"",pe2:"",idade:"",alt:"",peso:"",pais:"",social:"",cron:"",foto:"",doente:false,doenteDesde:"",recuperadoEm:"",at:{vel:5,res:5,pas:5,fin:5,def:5,aer:5}},S.perfil);
+S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at);S.metas=S.metas||[];
+TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["metas","Metas"],["rotina","Rotina"],["plano","Plano"]];
+function draw(){clearInterval(tm);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,metas:vMetas,rotina:vRotina,plano:vPlano}[tab];$("v").innerHTML=f();if(tab=="jogos")tick()}
+function I(l,id,v,t){return '<div><label>'+l+'</label><input id="'+id+'" type="'+(t||"text")+'" value="'+esc(v)+'"></div>'}
+function Sx(l,id,o,v){return '<div><label>'+l+'</label><select id="'+id+'">'+o.map(function(x){var a=Array.isArray(x)?x:[x,x];return '<option value="'+a[0]+'"'+(v==a[0]?" selected":"")+'>'+a[1]+'</option>'}).join("")+'</select></div>'}
+function ladoDe(x){return /direito/i.test(x)?"Direito":/esquerdo/i.test(x)?"Esquerdo":/Guarda/.test(x)?"Baliza":"Central"}
+function vPerfil(){var p=S.perfil,a=p.at,L={vel:"Velocidade",res:"Resistência",pas:"Passe",fin:"Finalização",def:"Defesa",aer:"Jogo aéreo"};
+ return '<div class="card" style="text-align:center"><label for="ft" style="cursor:pointer"><div style="width:112px;height:112px;margin:0 auto 8px;border-radius:50%;border:3px solid var(--ac);overflow:hidden;background:var(--bg);display:grid;place-items:center;font-size:44px;color:var(--ac)">'+(p.foto?'<img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover" alt="">':esc((p.nome||"⚽").charAt(0).toUpperCase()))+'</div>'+(p.foto?'':'<span class="muted">Toca para adicionar a foto</span>')+'</label><input id="ft" type="file" accept="image/*" style="display:none" onchange="foto(this)"><h2 style="margin:6px 0 0">'+esc(p.nome||"O teu nome")+'</h2><div class="muted">'+[p.pos,p.lado?"lado "+p.lado.toLowerCase():"",p.idade?p.idade+" anos":"",p.pais].filter(Boolean).map(esc).join(" · ")+'</div></div>'+
+ '<div class="card"><h2>Carreira profissional</h2>'+stHtml(stats(S.jogos))+'</div>'+
+ '<div class="card"><h2>Dados pessoais</h2><div class="grid">'+I("Nome","pn",p.nome)+I("Idade","pi",p.idade,"number")+I("Altura (cm)","pal",p.alt,"number")+I("Peso (kg)","pw",p.peso,"number")+I("País","pc",p.pais)+Sx("Condição social","pso",[["","–"],["baixa","Baixa"],["media","Média"],["alta","Alta"]],p.social)+'</div></div>'+
+ '<div class="card"><h2>Posições e pés</h2><div class="grid">'+Sx("Posição principal","pp",[""].concat(POSS),p.pos)+Sx("Pé dominante (o que mais uso)","pe",["","Direito","Esquerdo"],p.pe)+Sx("Domínio do outro pé","pe2",["","Ambos","Bom","Razoável","Fraco"],p.pe2)+'</div><label style="margin-top:10px">Posições secundárias</label><div class="grid">'+POSS.map(function(x){return '<label style="display:flex;gap:6px;align-items:center;color:var(--tx);font-size:13px"><input type="checkbox" class="sc" value="'+x+'" style="width:auto"'+(p.sec.indexOf(x)>=0?" checked":"")+'>'+x+'</label>'}).join("")+'</div>'+
+ '<p class="muted">Não sabes a tua posição? Avalia-te de 1 a 10 e o app sugere posição principal, lado do campo e secundárias.</p><div class="grid">'+Object.keys(L).map(function(k){return '<div><label>'+L[k]+': <b id="v_'+k+'">'+a[k]+'</b></label><input id="at_'+k+'" type="range" min="1" max="10" value="'+a[k]+'" oninput="$(\'v_'+k+'\').textContent=this.value"></div>'}).join("")+'</div><button class="b" onclick="svP()">Guardar</button> <button class="b" style="background:var(--ac2)" onclick="sugerir()">Sugerir posições</button></div>'+
+ '<div class="card"><h2>Saúde</h2>'+I("Doenças crónicas ou de nascença (se houver)","pcr",p.cron)+'<label style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--tx)"><input type="checkbox" id="pd" style="width:auto"'+(p.doente?" checked":"")+'> Estou doente agora (treinos interrompidos)</label>'+(p.doente?'<p class="warn">Doente desde '+esc(p.doenteDesde)+'. <button class="g" onclick="recup()">Estou recuperado</button></p>':'')+'<button class="b" onclick="svP()">Guardar</button><p class="muted">Com doença crónica, confirma o plano com o médico.</p></div>'+
+ '<div class="card"><button class="g" onclick="exp()">Exportar dados (JSON)</button> <button class="g" onclick="imp()">Importar</button></div>'}
+function svP(){var p=S.perfil;p.nome=val("pn");p.idade=val("pi");p.alt=val("pal");p.peso=val("pw");p.pais=val("pc");p.social=val("pso");p.pos=val("pp");p.pe=val("pe");p.pe2=val("pe2");p.cron=val("pcr");p.lado=ladoDe(p.pos);
+ p.sec=[].slice.call(document.querySelectorAll(".sc:checked")).map(function(e){return e.value}).filter(function(x){return x!=p.pos});
+ ["vel","res","pas","fin","def","aer"].forEach(function(k){p.at[k]=+val("at_"+k)||5});
+ var d=$("pd").checked;if(d&&!p.doente)p.doenteDesde=new Date().toLocaleDateString("pt-PT");p.doente=d;sv();$("ttl").firstChild.nodeValue=p.nome||"FutPro";draw()}
+function sugerir(){svP();var p=S.perfil,a=p.at,al=+p.alt||170,lt=p.pe=="Esquerdo"?"esquerdo":"direito",
+ sc=[["Guarda-redes",a.aer*1.2+(al-170)/5+a.def*.3],["Defesa central",a.def*1.4+a.aer+(al-170)/6],["Lateral "+lt,a.vel+a.res+a.def*.7],["Médio defensivo",a.def+a.pas+a.res*.6],["Médio centro",a.pas*1.3+a.res*1.2],["Médio ofensivo",a.pas*1.4+a.fin*.8],["Extremo "+lt,a.vel*1.4+a.fin*.7+a.pas*.4],["Avançado",a.fin*1.5+a.vel*.6+a.aer*.5]].sort(function(x,y){return y[1]-x[1]});
+ p.pos=sc[0][0];p.sec=[sc[1][0],sc[2][0]];p.lado=ladoDe(p.pos);sv();draw()}
+function recup(){S.perfil.doente=false;S.perfil.recuperadoEm=new Date().toISOString();sv();draw()}
+function foto(i){var f=i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas"),s=Math.min(1,320/Math.max(im.width,im.height));c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);S.perfil.foto=c.toDataURL("image/jpeg",.82);sv();draw()};im.src=r.result};r.readAsDataURL(f)}
+
+/* metas */
+function hoje(){var d=new Date();d.setHours(0,0,0,0);return d}
+function dsem(d){return (d.getDay()+6)%7}
+function proxMeta(){return S.metas.filter(function(x){return new Date(x.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0]}
+function fase(d){return d>60?"Base: volume e técnica":d>30?"Desenvolvimento: intensidade crescente":d>7?"Afinação específica da posição":d>=1?"Polimento: carga reduzida em 40%":"Dia da meta"}
+function vMetas(){var h='<div class="card"><h2>Nova meta</h2><div class="grid">'+I("Meta (ex.: Peneira)","mn","")+I("Data e hora","md","","datetime-local")+Sx("Tipo","mt",["Peneira","Jogo importante","Teste físico","Outra"],"")+'</div><button class="b" onclick="addMeta()">Adicionar meta</button></div><div class="card"><h2>As tuas metas</h2>';
+ S.metas.slice().sort(function(a,b){return new Date(a.data)-new Date(b.data)}).forEach(function(m){var ms=new Date(m.data)-new Date(),d=ms/864e5;h+='<div class="row"><div><b>'+esc(m.nome)+'</b> <span class="tag">'+esc(m.tipo)+'</span><br><span class="muted">'+fd(m.data)+'</span><br>'+(ms>0?'<span class="warn">Faltam '+Math.floor(d)+' dias e '+Math.floor(ms/36e5%24)+' h · '+fase(d)+'</span>':'<span class="muted">Concluída</span>')+'</div><button class="g" onclick="del(\'metas\',\''+m.id+'\')">✕</button></div>'});
+ return h+(S.metas.length?'':'<p class="muted">Sem metas.</p>')+'</div>'}
+function addMeta(){if(!val("mn").trim()||!val("md"))return;S.metas.push({id:uid(),nome:val("mn"),data:val("md"),tipo:val("mt")});sv();draw()}
+
+/* plano automático */
+function foco(x){return /Guarda/.test(x)?"reflexos 4 × 8 defesas, jogo de pés, saídas aéreas":/central/i.test(x)?"duelos aéreos, desarme 1x1, saída de bola com os dois pés":/Lateral/.test(x)?"20 cruzamentos, 8 × 70 m, 1x1 defensivo":/defensivo/.test(x)?"cobertura, 20 passes longos, recuperação de bola":/centro/.test(x)?"passe sob pressão, rondos 5x2, 6 × 3 min de resistência":/ofensivo/.test(x)?"último passe, remate de fora da área, drible curto":/Extremo/.test(x)?"1x1 ofensivo, 8 × 30 m, cruzamento e remate diagonal":/Avan/.test(x)?"30 remates, movimento sem bola, jogo de costas":"técnica geral"}
+function ali(p){var c=(p.pais||"").toLowerCase(),af=/mo[çc]amb|angola|mz/.test(c),br=/brasil/.test(c),b=af?"xima ou arroz":br?"arroz e feijão":"arroz ou batata",v=af?"matapa ou couve":"legumes",
+ pr={baixa:"ovos, feijão, sardinha ou peixe seco",media:"frango, peixe, ovos e feijão",alta:"frango, peixe, carne magra e iogurte"}[p.social]||"frango, peixe, ovos e feijão",
+ la={baixa:"amendoim e banana",media:"banana e pão com ovo",alta:"banana, aveia e iogurte"}[p.social]||"banana e pão com ovo";
+ return{pa:(af?"papa de milho ou pão":"aveia ou pão")+" com ovos e fruta",al:b+", "+pr+", "+v,la:la,ja:b+", "+pr+", "+v}}
+function vPlano(){var p=S.perfil;if(!p.pos)return '<div class="card"><p>Escolhe a posição no Perfil, ou toca em Sugerir posições, para gerar o plano.</p></div>';
+ return '<div class="card"><label>Máx. de jogos na zona por dia (min)</label><input type="number" value="'+(S.cfg.jogoMax||0)+'" onchange="S.cfg.jogoMax=+this.value;sv();draw()"></div>'+plano()}
+function plano(){var p=S.perfil,now=hoje(),idade=+p.idade||0,peso=+p.peso||0,doente=p.doente,mt=proxMeta(),dm=mt?(new Date(mt.data)-new Date())/864e5:0,
+ rec=p.recuperadoEm?Math.floor((now-new Date(p.recuperadoEm))/864e5):99,
+ need=idade&&idade<=13?10:idade&&idade<=17?9:8,sb=S.rotina.filter(function(r){return cls(r.nome).c=="sono"})[0],w,sl;
+ if(sb){sl=t2m(sb.ini);w=t2m(sb.fim)}else{var o=S.rotina.map(function(r){return t2m(r.ini)}).sort(function(a,b){return a-b})[0];w=((o!=null?o-90:360)+1440)%1440;sl=((w-need*60)%1440+1440)%1440}
+ var sh=((w-sl+1440)%1440)/60,n=idade&&idade<14?3:5;if(p.cron)n=Math.min(n,4);if(mt&&dm<=30&&!(idade&&idade<14)&&!p.cron)n=6;
+ var pat={3:[0,2,4],4:[0,1,3,5],5:[0,1,3,4,5],6:[0,1,2,3,4,5]}[n],fac=(rec<3?.5:rec<7?.75:1)*(p.cron?.8:1)*(mt&&dm>=1&&dm<=7?.6:1),tn=Math.round(75*fac),
+ nx=S.jogos.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0],hn=nx?(new Date(nx.data)-new Date())/36e5:0,
+ sec=p.sec.slice(0,2),ptxt=nx&&nx.posJ&&nx.posJ!=p.pos?"30 min "+nx.posJ+" (jogo vs "+nx.adv+" em "+Math.floor(hn/24)+" d "+Math.round(hn%24)+" h) + 30 min "+p.pos:["36 min "+p.pos].concat(sec.map(function(s,i){return [15,9][i]+" min "+s})).join(" · ");
+ /* semana */
+ var wk=[];for(var i=0;i<7;i++){var d=new Date(now.getTime()+i*864e5),k=d.toDateString(),g=S.jogos.some(function(j){return !j.jogado&&new Date(j.data).toDateString()==k}),g1=S.jogos.some(function(j){return !j.jogado&&new Date(new Date(j.data).getTime()-864e5).toDateString()==k}),gm=mt&&new Date(mt.data).toDateString()==k;
+ wk.push([DN[dsem(d)]+" "+d.getDate()+"/"+(d.getMonth()+1),doente?"Repouso total":gm?"META: "+mt.nome:g?"Dia de jogo":g1?"Ativação leve 30 min · carga 40%":pat.indexOf(dsem(d))>=0?"Treino "+tn+" min · carga "+Math.round(fac*100)+"%":"Descanso ativo: caminhada 30 min + alongamento 20 min"])}
+ /* análise de desempenho */
+ var s=stats(S.jogos.concat(S.zona)),nt=[];
+ if(s.nn&&s.nota<6.5)nt.push("Nota média "+f1(s.nota)+": +20 min de decisão e técnica por sessão");
+ if(s.j&&s.min/s.j<45)nt.push("Média de "+Math.round(s.min/s.j)+" min por jogo: 2 sessões por semana de 8 × 30 s a 90% com 90 s de pausa");
+ if(/Avan|Extremo|ofensivo/.test(p.pos)&&s.j>2&&s.g90<.3)nt.push("Golos por 90 min: "+f1(s.g90)+": +20 min de finalização por sessão");
+ if(p.pe2&&p.pe2!="Ambos")nt.push("Outro pé ("+p.pe2.toLowerCase()+"): 15 min por sessão de passe e remate com o pé "+(p.pe=="Direito"?"esquerdo":"direito"));
+ /* dia tipo */
+ var e=sl>w?sl:1440,fr=free().map(function(f){return[Math.max(f[0],w+10),Math.min(f[1],e-45)]}).filter(function(f){return f[1]-f[0]>=20}),pl=[[w,w+10,"Acordar e beber 500 ml de água","recuperação"],[e-45,e,"Preparar o sono: sem ecrãs e alongamento de 10 min","recuperação"]],
+ has=function(c){return S.rotina.some(function(r){return cls(r.nome).c==c})};
+ function put(nm,d,pr,c0){for(var i=0;i<fr.length;i++){var f=fr[i],st=Math.max(f[0],pr);if(f[1]-st>=d){pl.push([st,st+d,nm,c0]);var a=[f[0],st],b=[st+d,f[1]],ins=[];fr.splice(i,1);if(a[1]-a[0]>=20)ins.push(a);if(b[1]-b[0]>=20)ins.push(b);fr.splice.apply(fr,[i,0].concat(ins));return true}}return false}
+ var A=ali(p),jm=S.cfg.jogoMax||0;
+ if(!doente){if(!has("banho")){put("Banho morno 34 °C, 5 min",15,w+10,"banho");put(p.cron?"Banho morno 30 °C, 4 min após o treino":"Banho frio 15 °C, 3 min após o treino",10,1045,"banho");put("Banho quente 38 °C, 8 min",15,e-120,"banho")}
+  if(!has("alimentação")){put("Pequeno-almoço: "+A.pa,30,w+10,"alimentação");put("Almoço: "+A.al,45,720,"alimentação");put("Lanche pré-treino: "+A.la,20,900,"alimentação");put("Jantar: "+A.ja,45,1140,"alimentação")}
+  put("Treino técnico ("+ptxt+")",Math.round(60*fac),540,"treino");put("Treino físico "+tn+" min: "+foco(p.pos),tn,930,"treino");put("Recuperação: alongamento 15 min + rolo de espuma 10 min",25,1020,"recuperação");
+  if(jm>0)put("Jogos na zona (máx. "+jm+" min)",jm,1170,"jogos")}
+ S.rotina.forEach(function(r){segs(r).forEach(function(q){pl.push([q[0],q[1],r.nome+" (rotina)",cls(r.nome).c])})});pl.sort(function(a,b){return a[0]-b[0]});
+ var col={};CAT.forEach(function(x){col[x[0]]=x[2]});
+ var K=peso?[Math.round(peso*45),Math.round(peso*38),Math.round(peso*1.8),f1(peso*.04)]:null,h='<div class="card"><h2>Resumo</h2><div class="stats"><div class="st"><b>'+f1(sh)+' h</b><span>Sono</span></div><div class="st"><b>'+m2t(w)+'</b><span>Acordar</span></div><div class="st"><b>'+m2t(sl)+'</b><span>Dormir</span></div><div class="st"><b>'+(doente?0:n)+'</b><span>Treinos por semana</span></div><div class="st"><b>'+(doente?0:Math.round(fac*100))+'%</b><span>Carga</span></div></div>'+(sh<need?'<p class="warn">Sono abaixo de '+need+' h: ajusta a rotina.</p>':'')+(mt?'<p><b>'+esc(mt.nome)+'</b> em '+Math.floor(dm)+' dias · <span class="warn">'+fase(dm)+'</span></p>':'')+'</div>';
+ if(doente)h+='<div class="card"><h2>Treino interrompido</h2><p>Doente desde '+esc(p.doenteDesde)+'. Repouso total, '+(peso?f1(peso*.045):"3")+' L de água por dia, banho morno 36 °C por 5 min, sem frio. Ao recuperar, toca em Estou recuperado no Perfil: carga 50% nos 3 primeiros dias, 75% até ao 7.º dia e 100% depois.</p></div>';
+ h+='<div class="card"><h2>Próximos 7 dias</h2>'+wk.map(function(x){return '<div class="row"><b>'+x[0]+'</b><span class="muted">'+x[1]+'</span></div>'}).join("")+'</div>';
+ if(!doente){h+='<div class="card"><h2>Dia de treino</h2>'+pl.map(function(x){return '<div class="row"><div><span class="tag" style="border-color:'+(col[x[3]]||"#8fa398")+'">'+x[3]+'</span> <b>'+esc(x[2])+'</b></div><span class="muted">'+m2t(x[0])+' – '+m2t(x[1])+'</span></div>'}).join("")+'</div>';
+  if(nt.length)h+='<div class="card"><h2>Ajustes pelo teu desempenho</h2><ul>'+nt.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>'}
+ h+='<div class="card"><h2>Recuperação diária</h2><ul><li>Sono: '+m2t(sl)+' às '+m2t(w)+' ('+f1(sh)+' h)</li><li>Manhã: banho morno 34 °C, 5 min</li><li>Após treino: '+(doente?"banho morno 36 °C, 5 min":p.cron?"banho morno 30 °C, 4 min":"banho frio 15 °C, 3 min, até 30 min depois")+'</li><li>Noite: banho quente 38 °C, 8 min, 2 h antes de dormir</li><li>Alongamento 10 min todos os dias</li></ul></div>';
+ h+='<div class="card"><h2>Alimentação'+(p.pais?' · '+esc(p.pais):'')+'</h2>'+(K?'<div class="stats"><div class="st"><b>'+K[0]+'</b><span>kcal treino</span></div><div class="st"><b>'+K[1]+'</b><span>kcal descanso</span></div><div class="st"><b>'+K[2]+' g</b><span>Proteína</span></div><div class="st"><b>'+K[3]+' L</b><span>Água</span></div></div>':'<p class="muted">Preenche o peso no Perfil para ver kcal, proteína e água.</p>')+'<ul><li>Pequeno-almoço: '+A.pa+'</li><li>Almoço: '+A.al+'</li><li>Lanche: '+A.la+'</li><li>Jantar: '+A.ja+'</li></ul></div>';
+ return h}
+nav();draw();if(S.perfil.nome)$("ttl").firstChild.nodeValue=S.perfil.nome;
+</script>
+</body>
+</html>
