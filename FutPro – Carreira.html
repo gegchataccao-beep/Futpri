@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FutPro – Carreira</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f3f6f4;--card:#fff;--tx:#0f1f17;--mu:#5b6b62;--ac:#0a9f4f;--ac2:#f5a623;--bd:#d9e2dc;--bad:#d64545}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1410;--card:#13211a;--tx:#e8f2ec;--mu:#8fa398;--ac:#2ee67a;--ac2:#ffc247;--bd:#223529;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0b1410;--card:#13211a;--tx:#e8f2ec;--mu:#8fa398;--ac:#2ee67a;--ac2:#ffc247;--bd:#223529;--bad:#ff6b6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background-image:repeating-linear-gradient(90deg,transparent 0 60px,rgba(46,230,122,.035) 60px 120px)}
+header{padding:18px 16px 8px;display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--ac),#066b34);display:grid;place-items:center;font-size:22px}
+h1{font-size:20px;margin:0}h1 small{display:block;font-size:12px;color:var(--mu);font-weight:400}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--bd)}
+nav button{flex:none;border:1px solid var(--bd);background:var(--card);color:var(--mu);padding:8px 14px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--ac);color:#04210f;border-color:var(--ac)}
+main{padding:14px 12px 40px;max-width:900px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 10px}
+.grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button.b{background:var(--ac);color:#04210f;border:0;padding:10px 16px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer;margin-top:8px}
+button.g{background:transparent;color:var(--mu);border:1px solid var(--bd);padding:6px 10px;border-radius:8px;font:inherit;font-size:12px;cursor:pointer}
+.stats{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(95px,1fr))}
+.st{background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.st b{display:block;font-size:22px;color:var(--ac)}.st span{font-size:11px;color:var(--mu)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--bd);flex-wrap:wrap}
+.row:first-of-type{border-top:0}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);color:var(--mu)}
+.cd{display:flex;gap:8px;justify-content:center;margin:8px 0}
+.cd div{background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;min-width:64px;text-align:center}
+.cd b{font-size:26px;display:block;color:var(--ac2)}.cd span{font-size:11px;color:var(--mu)}
+.bar{position:relative;height:38px;border-radius:10px;background:var(--bg);border:1px solid var(--bd);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;opacity:.9}
+.ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-top:3px}
+.pitch{height:120px;border-radius:12px;border:2px solid var(--ac);position:relative;background:repeating-linear-gradient(90deg,rgba(46,230,122,.08) 0 30px,transparent 30px 60px);margin-bottom:10px}
+.pitch:before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px solid var(--ac)}
+.pitch:after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;border:2px solid var(--ac);border-radius:50%;transform:translate(-50%,-50%)}
+.muted{color:var(--mu);font-size:13px}
+.ok{color:var(--ac)}.warn{color:var(--ac2)}
+ul{padding-left:18px;margin:6px 0}
+</style>
+</head>
+<body>
+<header><div class="logo">⚽</div><h1 id="ttl">FutPro<small>Carreira · Rotina · Plano</small></h1></header>
+<nav id="nav"></nav>
+<main id="v"></main>
+<script>
+var TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["rotina","Rotina"],["plano","Plano"]];
+var S={perfil:{nome:"",pos:"",pe:"",idade:"",clube:""},clubes:[],jogos:[],zona:[],rotina:[],cfg:{jogoMax:120,acorda:"06:00",dorme:"22:00"}};
+var tab="perfil",tm=null;
+try{var r=localStorage.getItem("futpro");if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+function sv(){try{localStorage.setItem("futpro",JSON.stringify(S));}catch(e){}}
+function $(i){return document.getElementById(i)}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function t2m(t){var p=t.split(":");return +p[0]*60+ +p[1]}
+function m2t(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+function f1(n){return (Math.round(n*100)/100).toFixed(2)}
+function fd(s){var d=new Date(s);return d.toLocaleDateString("pt-PT",{day:"2-digit",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}
+function nav(){$("nav").innerHTML=TABS.map(function(t){return '<button class="'+(tab==t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")}
+function go(t){tab=t;nav();draw();window.scrollTo(0,0)}
+function del(k,id){S[k]=S[k].filter(function(x){return x.id!=id});sv();draw()}
+function val(i){var e=$(i);return e?e.value:""}
+
+/* estatísticas */
+function stats(l){var p=l.filter(function(j){return j.jogado}),o={j:p.length,min:0,g:0,a:0,n:0,nn:0};
+ p.forEach(function(j){o.min+=+j.min||0;o.g+=+j.gols||0;o.a+=+j.ass||0;if(j.nota){o.n+=+j.nota;o.nn++}});
+ o.ga=o.g+o.a;o.gpj=o.j?o.g/o.j:0;o.apj=o.j?o.a/o.j:0;o.gapj=o.j?o.ga/o.j:0;o.nota=o.nn?o.n/o.nn:0;o.g90=o.min?o.g*90/o.min:0;return o}
+function stHtml(o){var c=[["Jogos",o.j],["Minutos",o.min],["Golos",o.g],["Assist.",o.a],["G+A",o.ga],["Golos/jogo",f1(o.gpj)],["Assist./jogo",f1(o.apj)],["G/A por jogo",f1(o.gapj)],["Golos/90'",f1(o.g90)],["Nota média",o.nn?f1(o.nota):"–"]];
+ return '<div class="stats">'+c.map(function(x){return '<div class="st"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>'}).join("")+'</div>'}
+
+/* views */
+function draw(){clearInterval(tm);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,rotina:vRotina,plano:vPlano}[tab];$("v").innerHTML=f();if(tab=="jogos")tick()}
+function vPerfil(){var p=S.perfil,all=stats(S.jogos);
+ return '<div class="card"><h2>O teu perfil</h2><div class="pitch"></div><div class="grid"><div><label>Nome</label><input id="pn" value="'+esc(p.nome)+'"></div><div><label>Posição</label><select id="pp">'+["","Guarda-redes","Defesa central","Lateral","Médio defensivo","Médio","Extremo","Avançado"].map(function(x){return '<option'+(p.pos==x?" selected":"")+'>'+x+'</option>'}).join("")+'</select></div><div><label>Pé preferido</label><select id="pe">'+["","Direito","Esquerdo","Ambos"].map(function(x){return '<option'+(p.pe==x?" selected":"")+'>'+x+'</option>'}).join("")+'</select></div><div><label>Idade</label><input id="pi" type="number" value="'+esc(p.idade)+'"></div></div><button class="b" onclick="svPerfil()">Guardar perfil</button></div>'+
+ '<div class="card"><h2>Carreira profissional (clubes reais)</h2>'+stHtml(all)+'</div>'+
+ '<div class="card"><h2>Cópia de segurança</h2><button class="g" onclick="exp()">Exportar dados (JSON)</button> <button class="g" onclick="imp()">Importar</button><p class="muted">Os dados ficam guardados neste navegador.</p></div>'}
+function svPerfil(){S.perfil={nome:val("pn"),pos:val("pp"),pe:val("pe"),idade:val("pi"),clube:S.perfil.clube};sv();$("ttl").firstChild.nodeValue=S.perfil.nome?S.perfil.nome:"FutPro";alert("Perfil guardado")}
+function exp(){var a=document.createElement("a");a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(S));a.download="futpro.json";a.click()}
+function imp(){var t=prompt("Cola aqui o JSON exportado:");if(!t)return;try{S=Object.assign(S,JSON.parse(t));sv();draw()}catch(e){alert("JSON inválido")}}
+
+function vCarreira(){
+ var h='<div class="card"><h2>Adicionar clube</h2><div class="grid"><div><label>País</label><input id="cp" placeholder="Moçambique"></div><div><label>Clube</label><input id="cn"></div><div><label>Liga / divisão</label><input id="cl"></div><div><label>Camisola nº</label><input id="cj" type="number"></div></div><button class="b" onclick="addClube()">Adicionar clube</button><p class="muted">Clubes com poucos dados públicos (ex.: Moçambique): o calendário é preenchido por ti na aba Jogos.</p></div>';
+ h+='<div class="card"><h2>Os teus clubes</h2>';
+ if(!S.clubes.length)h+='<p class="muted">Ainda sem clubes.</p>';
+ S.clubes.forEach(function(c){var s=stats(S.jogos.filter(function(j){return j.club==c.id}));
+  h+='<div class="row"><div><b>'+esc(c.nome)+'</b> <span class="tag">'+esc(c.pais)+'</span> <span class="tag">'+esc(c.liga||"liga n/d")+'</span><br><span class="muted">'+(c.plantel?"No plantel · nº "+esc(c.num||"–"):"Fora do plantel")+' · '+s.j+' jogos · '+s.g+' G · '+s.a+' A</span></div><div><button class="g" onclick="plantel(\''+c.id+'\')">'+(c.plantel?"Sair":"Entrar no plantel")+'</button> <button class="g" onclick="sel(\''+c.id+'\')">'+(S.perfil.clube==c.id?"✓ Atual":"Selecionar")+'</button> <button class="g" onclick="del(\'clubes\',\''+c.id+'\')">✕</button></div></div>'});
+ return h+'</div>'}
+function addClube(){var n=val("cn").trim();if(!n)return;S.clubes.push({id:uid(),pais:val("cp"),nome:n,liga:val("cl"),num:val("cj"),plantel:false});sv();draw()}
+function plantel(id){S.clubes.forEach(function(c){if(c.id==id)c.plantel=!c.plantel});sv();draw()}
+function sel(id){S.perfil.clube=id;sv();draw()}
+function cur(){return S.clubes.filter(function(c){return c.id==S.perfil.clube})[0]}
+
+function gForm(p,extra){return '<div class="grid"><div><label>Data e hora</label><input id="'+p+'d" type="datetime-local"></div><div><label>Adversário</label><input id="'+p+'a"></div><div><label>Competição</label><input id="'+p+'c"></div>'+extra+'</div>'}
+function gStats(p){return '<div class="grid" style="margin-top:8px"><div><label>Resultado (ex. 2-1)</label><input id="'+p+'r"></div><div><label>Minutos</label><input id="'+p+'m" type="number" max="130"></div><div><label>Golos</label><input id="'+p+'g" type="number"></div><div><label>Assistências</label><input id="'+p+'s" type="number"></div><div><label>Nota (0-10)</label><input id="'+p+'n" type="number" step="0.1" max="10"></div></div>'}
+function vJogos(){var c=cur();if(!c)return '<div class="card"><p>Seleciona um clube na aba Carreira.</p></div>';
+ var l=S.jogos.filter(function(j){return j.club==c.id}).sort(function(a,b){return new Date(a.data)-new Date(b.data)}),nx=l.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()})[0];
+ var h='<div class="card"><h2>'+esc(c.nome)+' · Próximo jogo</h2>'+(nx?'<p style="margin:0">vs <b>'+esc(nx.adv)+'</b> '+(nx.casa?"(casa)":"(fora)")+' · '+fd(nx.data)+'</p><div class="cd" id="cd"></div><div id="prep"></div>':'<p class="muted">Sem jogos futuros. Adiciona abaixo.</p>')+'</div>';
+ h+='<div class="card"><h2>Estatísticas no clube</h2>'+stHtml(stats(l))+'</div>';
+ h+='<div class="card"><h2>Adicionar jogo ao calendário</h2>'+gForm("j",'<div><label>Local</label><select id="jh"><option value="1">Casa</option><option value="0">Fora</option></select></div><div><label>Posição neste jogo</label><select id="jp"><option value="">Posição principal</option>'+POSS.map(function(x){return '<option>'+x+'</option>'}).join("")+'</select></div>')+'<button class="b" onclick="addJogo()">Adicionar jogo</button></div>';
+ h+='<div class="card"><h2>Calendário e resultados</h2>';
+ l.forEach(function(j){h+='<div class="row"><div><b>'+esc(j.adv)+'</b> <span class="tag">'+esc(j.comp||"jogo")+'</span> <span class="tag">'+(j.casa?"Casa":"Fora")+'</span><br><span class="muted">'+fd(j.data)+(j.jogado?' · '+esc(j.res||"–")+' · '+(j.min||0)+"' · "+(j.gols||0)+'G '+(j.ass||0)+'A · nota '+(j.nota||"–"):'')+'</span></div><div><button class="g" onclick="edJogo(\''+j.id+'\')">'+(j.jogado?"Editar":"Registar")+'</button> <button class="g" onclick="del(\'jogos\',\''+j.id+'\')">✕</button></div></div>'});
+ return h+(l.length?'':'<p class="muted">Sem jogos.</p>')+'<div id="ed"></div></div>'}
+function addJogo(){var c=cur();if(!val("jd")||!val("ja").trim())return;S.jogos.push({id:uid(),club:c.id,data:val("jd"),adv:val("ja"),comp:val("jc"),casa:val("jh")=="1",posJ:val("jp"),jogado:false});sv();draw()}
+function edJogo(id){var j=S.jogos.filter(function(x){return x.id==id})[0];$("ed").innerHTML='<hr><h2>Registar desempenho: '+esc(j.adv)+'</h2>'+gStats("e")+'<button class="b" onclick="svJogo(\''+id+'\')">Guardar</button>';
+ ["r:res","m:min","g:gols","s:ass","n:nota"].forEach(function(x){var p=x.split(":");$("e"+p[0]).value=j[p[1]]||""})}
+function svJogo(id){S.jogos.forEach(function(j){if(j.id==id){j.res=val("er");j.min=+val("em")||0;j.gols=+val("eg")||0;j.ass=+val("es")||0;j.nota=+val("en")||0;j.jogado=true}});sv();draw()}
+function tick(){var c=cur();if(!c)return;var nx=S.jogos.filter(function(j){return j.club==c.id&&!j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0];if(!nx)return;
+ function u(){var d=new Date(nx.data)-new Date();if(d<0){draw();return}var s=Math.floor(d/1000),dd=Math.floor(s/86400),hh=Math.floor(s%86400/3600),mm=Math.floor(s%3600/60),ss=s%60,e=$("cd");if(!e)return;
+  e.innerHTML=[[dd,"dias"],[hh,"horas"],[mm,"min"],[ss,"seg"]].map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join("");
+  var H=d/3600000,t=H>48?["Treino normal; sono de 8 h","Hidratação constante"]:H>24?["Carga reduzida; carboidratos nas refeições","Análise do adversário","Preparar equipamento"]:H>3?["Sono de 8 a 9 h","Hidratar: 2 L até ao jogo","Visualização tática 15 min"]:["Refeição leve concluída","Aquecimento dinâmico 20 min","Foco e respiração 5 min"];
+  $("prep").innerHTML='<b class="warn">Preparação agora</b><ul>'+t.map(function(x){return '<li>'+x+'</li>'}).join("")+'</ul>'}
+ u();tm=setInterval(u,1000)}
+
+function vZona(){var s=stats(S.zona),h='<div class="card"><h2>Jogos da zona (não contam para o profissional)</h2>'+stHtml(s)+'</div><div class="card"><h2>Adicionar jogo da zona</h2>'+gForm("z",'<div><label>Local</label><input id="zl"></div>')+gStats("z2")+'<button class="b" onclick="addZona()">Guardar</button></div><div class="card"><h2>Histórico</h2>';
+ S.zona.slice().sort(function(a,b){return new Date(b.data)-new Date(a.data)}).forEach(function(j){h+='<div class="row"><div><b>'+esc(j.adv)+'</b> <span class="tag">zona</span><br><span class="muted">'+fd(j.data)+' · '+esc(j.res||"–")+' · '+j.min+"' · "+j.gols+'G '+j.ass+'A · nota '+(j.nota||"–")+'</span></div><button class="g" onclick="del(\'zona\',\''+j.id+'\')">✕</button></div>'});
+ return h+(S.zona.length?'':'<p class="muted">Sem jogos.</p>')+'</div>'}
+function addZona(){if(!val("zd"))return;S.zona.push({id:uid(),data:val("zd"),adv:val("za")||"Zona",comp:val("zc"),res:val("z2r"),min:+val("z2m")||0,gols:+val("z2g")||0,ass:+val("z2s")||0,nota:+val("z2n")||0,jogado:true});sv();draw()}
+
+/* rotina: deteção automática */
+var CAT=[["sono",/dorm|sono|deit|acord|levant/i,"#6c63ff"],["banho",/banho|duche|ducha/i,"#2db7f5"],["treino",/treino|gin[aá]sio|corrida|gym|cardio|for[cç]a|t[eé]cnic/i,"#2ee67a"],["alimentação",/comer|almo[cç]o|jantar|pequeno|lanche|refei|caf[eé]/i,"#f5a623"],["jogos",/jogo|fifa|ps\d|consola|playstation|videojogo|efootball/i,"#e056fd"],["estudo",/estud|aula|escola|instituto|trabalho/i,"#ff7675"],["recuperação",/descans|alongam|recuper|massag|gelo|sesta/i,"#00cec9"]];
+function cls(n){for(var i=0;i<CAT.length;i++)if(CAT[i][1].test(n))return{c:CAT[i][0],k:CAT[i][2]};return{c:"outro",k:"#8fa398"}}
+function banhoTipo(n){return /gelad/i.test(n)?"gelado (10 a 15 °C, 2 a 3 min)":/frio|fria/i.test(n)?"frio (15 a 20 °C, 3 a 5 min)":/quente/i.test(n)?"quente (36 a 38 °C, 5 a 8 min)":""}
+function segs(r){var a=t2m(r.ini),b=t2m(r.fim);return b>a?[[a,b]]:[[a,1440],[0,b]]}
+function busy(){var o=[];S.rotina.forEach(function(r){segs(r).forEach(function(s){o.push(s)})});return o.sort(function(a,b){return a[0]-b[0]})}
+function free(){var o=busy(),f=[],c=0;o.forEach(function(s){if(s[0]>c)f.push([c,s[0]]);c=Math.max(c,s[1])});if(c<1440)f.push([c,1440]);return f}
+function vRotina(){var h='<div class="card"><h2>Adicionar atividade</h2><div class="grid"><div><label>O que fazes</label><input id="ra" placeholder="dormir, banho gelado, treino…"></div><div><label>Início</label><input id="ri" type="time" value="06:00"></div><div><label>Fim</label><input id="rf" type="time" value="07:00"></div></div><button class="b" onclick="addRot()">Adicionar</button><p class="muted">A atividade é reconhecida pelo nome e o horário é classificado como ocupado.</p></div>';
+ h+='<div class="card"><h2>Linha do dia (24 h)</h2><div class="bar">'+S.rotina.map(function(r){var k=cls(r.nome).k;return segs(r).map(function(s){return '<i style="left:'+s[0]/14.4+'%;width:'+(s[1]-s[0])/14.4+'%;background:'+k+'"></i>'}).join("")}).join("")+'</div><div class="ticks"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>';
+ var fr=free();h+='<p><b class="ok">Livre:</b> '+(fr.length?fr.map(function(f){return m2t(f[0])+" – "+(f[1]==1440?"24:00":m2t(f[1]))}).join(" · "):"nenhum")+'</p></div><div class="card"><h2>Atividades</h2>';
+ S.rotina.slice().sort(function(a,b){return t2m(a.ini)-t2m(b.ini)}).forEach(function(r){var c=cls(r.nome),bt=c.c=="banho"?banhoTipo(r.nome):"";h+='<div class="row"><div><b>'+esc(r.nome)+'</b> <span class="tag" style="border-color:'+c.k+'">'+c.c+'</span><br><span class="muted">'+r.ini+' – '+r.fim+(bt?" · banho "+bt:"")+'</span></div><button class="g" onclick="del(\'rotina\',\''+r.id+'\')">✕</button></div>'});
+ return h+(S.rotina.length?'':'<p class="muted">Sem atividades.</p>')+'</div>'}
+function addRot(){var n=val("ra").trim();if(!n)return;var a=val("ri"),b=val("rf");if(a==b)return;var nr={id:uid(),nome:n,ini:a,fim:b},ov=false;busy().forEach(function(s){segs(nr).forEach(function(q){if(q[0]<s[1]&&q[1]>s[0])ov=true})});
+ if(ov&&!confirm("Esse horário colide com outra atividade. Adicionar mesmo assim?"))return;S.rotina.push(nr);sv();draw()}
+
+/* plano automático */
+function vPlano(){var c=S.cfg,h='<div class="card"><h2>Parâmetros</h2><div class="grid"><div><label>Acordar</label><input id="pa" type="time" value="'+c.acorda+'"></div><div><label>Dormir</label><input id="pd" type="time" value="'+c.dorme+'"></div><div><label>Máx. jogos na zona / dia (min)</label><input id="pj" type="number" value="'+c.jogoMax+'"></div></div><button class="b" onclick="gen()">Gerar plano completo</button></div><div id="pl"></div>';return h}
+function gen(){var c=S.cfg={acorda:val("pa"),dorme:val("pd"),jogoMax:+val("pj")||0};sv();
+ var w=t2m(c.acorda),sl=t2m(c.dorme),cur0=w,fr=free().map(function(f){return[Math.max(f[0],w),Math.min(f[1],sl)]}).filter(function(f){return f[1]-f[0]>=20}),pl=[],has=function(c0){return S.rotina.some(function(r){return cls(r.nome).c==c0})};
+ function put(nome,dur,pref,cat){for(var i=0;i<fr.length;i++){var f=fr[i],st=Math.max(f[0],pref||0);if(f[1]-st>=dur){pl.push([st,st+dur,nome,cat]);if(st>f[0]){fr.splice(i+1,0,[st+dur,f[1]]);f[1]=st}else f[0]=st+dur;return true}}return false}
+ var nx=S.jogos.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0],hj=nx&&(new Date(nx.data)-new Date())<36e5*30;
+ pl.push([w,w+10,"Acordar, 500 ml de água, mobilidade leve","recuperação"]);pl.push([sl-45,sl,"Rotina de sono: sem ecrãs, alongamento leve, respiração","recuperação"]);
+ fr=fr.map(function(f){return[f[0]+(f[0]==w?10:0),Math.min(f[1],sl-45)]});
+ if(!has("alimentação")){put("Pequeno-almoço: ovos, aveia, fruta",30,w+10,"alimentação");put("Almoço: arroz/massa, proteína, legumes",45,720,"alimentação");put("Lanche pré-treino: banana e pão",20,930,"alimentação");put("Jantar: proteína, legumes, hidratos moderados",45,1140,"alimentação")}
+ if(hj){put("Aquecimento e ativação (jogo próximo)",30,900,"treino");put("Visualização tática",20,0,"treino")}
+ else{put("Treino físico: força e potência",75,960,"treino");put("Treino técnico: passe, finalização, controlo",60,540,"treino");put("Treino aeróbio/intervalado",40,600,"treino")}
+ put("Recuperação: alongamento e rolo de espuma",25,1020,"recuperação");
+ if(!has("banho"))put("Banho gelado 2 a 3 min (10 a 15 °C) após o treino",15,1050,"banho");
+ if(c.jogoMax>0)put("Jogos na zona (limite "+c.jogoMax+" min)",Math.min(c.jogoMax,150),1170,"jogos");
+ S.rotina.forEach(function(r){segs(r).forEach(function(s){pl.push([s[0],s[1],r.nome+" (rotina)",cls(r.nome).c])})});
+ pl.sort(function(a,b){return a[0]-b[0]});
+ var col={};CAT.forEach(function(x){col[x[0]]=x[2]});
+ var h='<div class="card"><h2>Plano do dia'+(hj?' · dia de jogo próximo':'')+'</h2>';
+ pl.forEach(function(p){h+='<div class="row"><div><span class="tag" style="border-color:'+(col[p[3]]||"#8fa398")+'">'+p[3]+'</span> <b>'+esc(p[2])+'</b></div><span class="muted">'+m2t(p[0])+' – '+m2t(p[1])+'</span></div>'});
+ var sh=(((t2m(c.acorda)-sl)%1440)+1440)%1440/60;h+='<p class="muted">Sono planeado: '+f1(sh)+' h '+(sh<8?'<span class="warn">(abaixo de 8 h)</span>':'<span class="ok">(adequado)</span>')+'</p></div>';$("pl").innerHTML=h}
+</script><script>
+/* ===== v2: perfil completo, metas, saúde e plano automático ===== */
+var POSS=["Guarda-redes","Defesa central","Lateral direito","Lateral esquerdo","Médio defensivo","Médio centro","Médio ofensivo","Extremo direito","Extremo esquerdo","Avançado"];
+var DN=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+S.perfil=Object.assign({nome:"",pos:"",sec:[],lado:"",pe:"",pe2:"",idade:"",alt:"",peso:"",pais:"",social:"",cron:"",foto:"",doente:false,doenteDesde:"",recuperadoEm:"",at:{vel:5,res:5,pas:5,fin:5,def:5,aer:5}},S.perfil);
+S.perfil.at=Object.assign({vel:5,res:5,pas:5,fin:5,def:5,aer:5},S.perfil.at);S.metas=S.metas||[];
+TABS=[["perfil","Perfil"],["carreira","Carreira"],["jogos","Jogos"],["zona","Zona"],["metas","Metas"],["rotina","Rotina"],["plano","Plano"]];
+function draw(){clearInterval(tm);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,metas:vMetas,rotina:vRotina,plano:vPlano}[tab];$("v").innerHTML=f();if(tab=="jogos")tick()}
+function I(l,id,v,t){return '<div><label>'+l+'</label><input id="'+id+'" type="'+(t||"text")+'" value="'+esc(v)+'"></div>'}
+function Sx(l,id,o,v){return '<div><label>'+l+'</label><select id="'+id+'">'+o.map(function(x){var a=Array.isArray(x)?x:[x,x];return '<option value="'+a[0]+'"'+(v==a[0]?" selected":"")+'>'+a[1]+'</option>'}).join("")+'</select></div>'}
+function ladoDe(x){return /direito/i.test(x)?"Direito":/esquerdo/i.test(x)?"Esquerdo":/Guarda/.test(x)?"Baliza":"Central"}
+function vPerfil(){var p=S.perfil,a=p.at,L={vel:"Velocidade",res:"Resistência",pas:"Passe",fin:"Finalização",def:"Defesa",aer:"Jogo aéreo"};
+ return '<div class="card" style="text-align:center"><label for="ft" style="cursor:pointer"><div style="width:112px;height:112px;margin:0 auto 8px;border-radius:50%;border:3px solid var(--ac);overflow:hidden;background:var(--bg);display:grid;place-items:center;font-size:44px;color:var(--ac)">'+(p.foto?'<img src="'+p.foto+'" style="width:100%;height:100%;object-fit:cover" alt="">':esc((p.nome||"⚽").charAt(0).toUpperCase()))+'</div>'+(p.foto?'':'<span class="muted">Toca para adicionar a foto</span>')+'</label><input id="ft" type="file" accept="image/*" style="display:none" onchange="foto(this)"><h2 style="margin:6px 0 0">'+esc(p.nome||"O teu nome")+'</h2><div class="muted">'+[p.pos,p.lado?"lado "+p.lado.toLowerCase():"",p.idade?p.idade+" anos":"",p.pais].filter(Boolean).map(esc).join(" · ")+'</div></div>'+
+ '<div class="card"><h2>Carreira profissional</h2>'+stHtml(stats(S.jogos))+'</div>'+
+ '<div class="card"><h2>Dados pessoais</h2><div class="grid">'+I("Nome","pn",p.nome)+I("Idade","pi",p.idade,"number")+I("Altura (cm)","pal",p.alt,"number")+I("Peso (kg)","pw",p.peso,"number")+I("País","pc",p.pais)+Sx("Condição social","pso",[["","–"],["baixa","Baixa"],["media","Média"],["alta","Alta"]],p.social)+'</div></div>'+
+ '<div class="card"><h2>Posições e pés</h2><div class="grid">'+Sx("Posição principal","pp",[""].concat(POSS),p.pos)+Sx("Pé dominante (o que mais uso)","pe",["","Direito","Esquerdo"],p.pe)+Sx("Domínio do outro pé","pe2",["","Ambos","Bom","Razoável","Fraco"],p.pe2)+'</div><label style="margin-top:10px">Posições secundárias</label><div class="grid">'+POSS.map(function(x){return '<label style="display:flex;gap:6px;align-items:center;color:var(--tx);font-size:13px"><input type="checkbox" class="sc" value="'+x+'" style="width:auto"'+(p.sec.indexOf(x)>=0?" checked":"")+'>'+x+'</label>'}).join("")+'</div>'+
+ '<p class="muted">Não sabes a tua posição? Avalia-te de 1 a 10 e o app sugere posição principal, lado do campo e secundárias.</p><div class="grid">'+Object.keys(L).map(function(k){return '<div><label>'+L[k]+': <b id="v_'+k+'">'+a[k]+'</b></label><input id="at_'+k+'" type="range" min="1" max="10" value="'+a[k]+'" oninput="$(\'v_'+k+'\').textContent=this.value"></div>'}).join("")+'</div><button class="b" onclick="svP()">Guardar</button> <button class="b" style="background:var(--ac2)" onclick="sugerir()">Sugerir posições</button></div>'+
+ '<div class="card"><h2>Saúde</h2>'+I("Doenças crónicas ou de nascença (se houver)","pcr",p.cron)+'<label style="display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--tx)"><input type="checkbox" id="pd" style="width:auto"'+(p.doente?" checked":"")+'> Estou doente agora (treinos interrompidos)</label>'+(p.doente?'<p class="warn">Doente desde '+esc(p.doenteDesde)+'. <button class="g" onclick="recup()">Estou recuperado</button></p>':'')+'<button class="b" onclick="svP()">Guardar</button><p class="muted">Com doença crónica, confirma o plano com o médico.</p></div>'+
+ '<div class="card"><button class="g" onclick="exp()">Exportar dados (JSON)</button> <button class="g" onclick="imp()">Importar</button></div>'}
+function svP(){var p=S.perfil;p.nome=val("pn");p.idade=val("pi");p.alt=val("pal");p.peso=val("pw");p.pais=val("pc");p.social=val("pso");p.pos=val("pp");p.pe=val("pe");p.pe2=val("pe2");p.cron=val("pcr");p.lado=ladoDe(p.pos);
+ p.sec=[].slice.call(document.querySelectorAll(".sc:checked")).map(function(e){return e.value}).filter(function(x){return x!=p.pos});
+ ["vel","res","pas","fin","def","aer"].forEach(function(k){p.at[k]=+val("at_"+k)||5});
+ var d=$("pd").checked;if(d&&!p.doente)p.doenteDesde=new Date().toLocaleDateString("pt-PT");p.doente=d;sv();$("ttl").firstChild.nodeValue=p.nome||"FutPro";draw()}
+function sugerir(){svP();var p=S.perfil,a=p.at,al=+p.alt||170,lt=p.pe=="Esquerdo"?"esquerdo":"direito",
+ sc=[["Guarda-redes",a.aer*1.2+(al-170)/5+a.def*.3],["Defesa central",a.def*1.4+a.aer+(al-170)/6],["Lateral "+lt,a.vel+a.res+a.def*.7],["Médio defensivo",a.def+a.pas+a.res*.6],["Médio centro",a.pas*1.3+a.res*1.2],["Médio ofensivo",a.pas*1.4+a.fin*.8],["Extremo "+lt,a.vel*1.4+a.fin*.7+a.pas*.4],["Avançado",a.fin*1.5+a.vel*.6+a.aer*.5]].sort(function(x,y){return y[1]-x[1]});
+ p.pos=sc[0][0];p.sec=[sc[1][0],sc[2][0]];p.lado=ladoDe(p.pos);sv();draw()}
+function recup(){S.perfil.doente=false;S.perfil.recuperadoEm=new Date().toISOString();sv();draw()}
+function foto(i){var f=i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement("canvas"),s=Math.min(1,320/Math.max(im.width,im.height));c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);S.perfil.foto=c.toDataURL("image/jpeg",.82);sv();draw()};im.src=r.result};r.readAsDataURL(f)}
+
+/* metas */
+function hoje(){var d=new Date();d.setHours(0,0,0,0);return d}
+function dsem(d){return (d.getDay()+6)%7}
+function proxMeta(){return S.metas.filter(function(x){return new Date(x.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0]}
+function fase(d){return d>60?"Base: volume e técnica":d>30?"Desenvolvimento: intensidade crescente":d>7?"Afinação específica da posição":d>=1?"Polimento: carga reduzida em 40%":"Dia da meta"}
+function vMetas(){var h='<div class="card"><h2>Nova meta</h2><div class="grid">'+I("Meta (ex.: Peneira)","mn","")+I("Data e hora","md","","datetime-local")+Sx("Tipo","mt",["Peneira","Jogo importante","Teste físico","Outra"],"")+'</div><button class="b" onclick="addMeta()">Adicionar meta</button></div><div class="card"><h2>As tuas metas</h2>';
+ S.metas.slice().sort(function(a,b){return new Date(a.data)-new Date(b.data)}).forEach(function(m){var ms=new Date(m.data)-new Date(),d=ms/864e5;h+='<div class="row"><div><b>'+esc(m.nome)+'</b> <span class="tag">'+esc(m.tipo)+'</span><br><span class="muted">'+fd(m.data)+'</span><br>'+(ms>0?'<span class="warn">Faltam '+Math.floor(d)+' dias e '+Math.floor(ms/36e5%24)+' h · '+fase(d)+'</span>':'<span class="muted">Concluída</span>')+'</div><button class="g" onclick="del(\'metas\',\''+m.id+'\')">✕</button></div>'});
+ return h+(S.metas.length?'':'<p class="muted">Sem metas.</p>')+'</div>'}
+function addMeta(){if(!val("mn").trim()||!val("md"))return;S.metas.push({id:uid(),nome:val("mn"),data:val("md"),tipo:val("mt")});sv();draw()}
+
+/* plano automático */
+function foco(x){return /Guarda/.test(x)?"reflexos 4 × 8 defesas, jogo de pés, saídas aéreas":/central/i.test(x)?"duelos aéreos, desarme 1x1, saída de bola com os dois pés":/Lateral/.test(x)?"20 cruzamentos, 8 × 70 m, 1x1 defensivo":/defensivo/.test(x)?"cobertura, 20 passes longos, recuperação de bola":/centro/.test(x)?"passe sob pressão, rondos 5x2, 6 × 3 min de resistência":/ofensivo/.test(x)?"último passe, remate de fora da área, drible curto":/Extremo/.test(x)?"1x1 ofensivo, 8 × 30 m, cruzamento e remate diagonal":/Avan/.test(x)?"30 remates, movimento sem bola, jogo de costas":"técnica geral"}
+function ali(p){var c=(p.pais||"").toLowerCase(),af=/mo[çc]amb|angola|mz/.test(c),br=/brasil/.test(c),b=af?"xima ou arroz":br?"arroz e feijão":"arroz ou batata",v=af?"matapa ou couve":"legumes",
+ pr={baixa:"ovos, feijão, sardinha ou peixe seco",media:"frango, peixe, ovos e feijão",alta:"frango, peixe, carne magra e iogurte"}[p.social]||"frango, peixe, ovos e feijão",
+ la={baixa:"amendoim e banana",media:"banana e pão com ovo",alta:"banana, aveia e iogurte"}[p.social]||"banana e pão com ovo";
+ return{pa:(af?"papa de milho ou pão":"aveia ou pão")+" com ovos e fruta",al:b+", "+pr+", "+v,la:la,ja:b+", "+pr+", "+v}}
+function vPlano(){var p=S.perfil;if(!p.pos)return '<div class="card"><p>Escolhe a posição no Perfil, ou toca em Sugerir posições, para gerar o plano.</p></div>';
+ return '<div class="card"><label>Máx. de jogos na zona por dia (min)</label><input type="number" value="'+(S.cfg.jogoMax||0)+'" onchange="S.cfg.jogoMax=+this.value;sv();draw()"></div>'+plano()}
+function plano(){var p=S.perfil,now=hoje(),idade=+p.idade||0,peso=+p.peso||0,doente=p.doente,mt=proxMeta(),dm=mt?(new Date(mt.data)-new Date())/864e5:0,
+ rec=p.recuperadoEm?Math.floor((now-new Date(p.recuperadoEm))/864e5):99,
+ need=idade&&idade<=13?10:idade&&idade<=17?9:8,sb=S.rotina.filter(function(r){return cls(r.nome).c=="sono"})[0],w,sl;
+ if(sb){sl=t2m(sb.ini);w=t2m(sb.fim)}else{var o=S.rotina.map(function(r){return t2m(r.ini)}).sort(function(a,b){return a-b})[0];w=((o!=null?o-90:360)+1440)%1440;sl=((w-need*60)%1440+1440)%1440}
+ var sh=((w-sl+1440)%1440)/60,n=idade&&idade<14?3:5;if(p.cron)n=Math.min(n,4);if(mt&&dm<=30&&!(idade&&idade<14)&&!p.cron)n=6;if(S.cfg.dias)n=+S.cfg.dias;
+ var pat={3:[0,2,4],4:[0,1,3,5],5:[0,1,3,4,5],6:[0,1,2,3,4,5]}[n],fac=(rec<3?.5:rec<7?.75:1)*(p.cron?.8:1)*(mt&&dm>=1&&dm<=7?.6:1)*(S.cfg.carga?S.cfg.carga/100:1),tn=Math.round(75*fac),
+ nx=S.jogos.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0],hn=nx?(new Date(nx.data)-new Date())/36e5:0,
+ sec=p.sec.slice(0,2),ptxt=nx&&nx.posJ&&nx.posJ!=p.pos?"30 min "+nx.posJ+" (jogo vs "+nx.adv+" em "+Math.floor(hn/24)+" d "+Math.round(hn%24)+" h) + 30 min "+p.pos:["36 min "+p.pos].concat(sec.map(function(s,i){return [15,9][i]+" min "+s})).join(" · ");
+ /* semana */
+ var wk=[];for(var i=0;i<7;i++){var d=new Date(now.getTime()+i*864e5),k=d.toDateString(),g=S.jogos.some(function(j){return !j.jogado&&new Date(j.data).toDateString()==k}),g1=S.jogos.some(function(j){return !j.jogado&&new Date(new Date(j.data).getTime()-864e5).toDateString()==k}),gm=mt&&new Date(mt.data).toDateString()==k;
+ wk.push([DN[dsem(d)]+" "+d.getDate()+"/"+(d.getMonth()+1),doente?"Repouso total":gm?"META: "+mt.nome:g?"Dia de jogo":g1?"Ativação leve 30 min · carga 40%":pat.indexOf(dsem(d))>=0?"Treino "+tn+" min · carga "+Math.round(fac*100)+"%":"Descanso ativo: caminhada 30 min + alongamento 20 min"])}
+ /* análise de desempenho */
+ var s=stats(S.jogos.concat(S.zona)),nt=[];
+ if(s.nn&&s.nota<6.5)nt.push("Nota média "+f1(s.nota)+": +20 min de decisão e técnica por sessão");
+ if(s.j&&s.min/s.j<45)nt.push("Média de "+Math.round(s.min/s.j)+" min por jogo: 2 sessões por semana de 8 × 30 s a 90% com 90 s de pausa");
+ if(/Avan|Extremo|ofensivo/.test(p.pos)&&s.j>2&&s.g90<.3)nt.push("Golos por 90 min: "+f1(s.g90)+": +20 min de finalização por sessão");
+ if(p.pe2&&p.pe2!="Ambos")nt.push("Outro pé ("+p.pe2.toLowerCase()+"): 15 min por sessão de passe e remate com o pé "+(p.pe=="Direito"?"esquerdo":"direito"));
+ /* dia tipo */
+ var e=sl>w?sl:1440,fr=free().map(function(f){return[Math.max(f[0],w+10),Math.min(f[1],e-45)]}).filter(function(f){return f[1]-f[0]>=20}),pl=[[w,w+10,"Acordar e beber 500 ml de água","recuperação"],[e-45,e,"Preparar o sono: sem ecrãs e alongamento de 10 min","recuperação"]],
+ has=function(c){return S.rotina.some(function(r){return cls(r.nome).c==c})};
+ function put(nm,d,pr,c0){for(var i=0;i<fr.length;i++){var f=fr[i],st=Math.max(f[0],pr);if(f[1]-st>=d){pl.push([st,st+d,nm,c0]);var a=[f[0],st],b=[st+d,f[1]],ins=[];fr.splice(i,1);if(a[1]-a[0]>=20)ins.push(a);if(b[1]-b[0]>=20)ins.push(b);fr.splice.apply(fr,[i,0].concat(ins));return true}}return false}
+ var A=ali(p),jm=S.cfg.jogoMax||0;
+ if(!doente){if(!has("banho")){put("Banho morno 34 °C, 5 min",15,w+10,"banho");put(p.cron?"Banho morno 30 °C, 4 min após o treino":"Banho frio 15 °C, 3 min após o treino",10,1045,"banho");put("Banho quente 38 °C, 8 min",15,e-120,"banho")}
+  if(!has("alimentação")){put("Pequeno-almoço: "+A.pa,30,w+10,"alimentação");put("Almoço: "+A.al,45,720,"alimentação");put("Lanche pré-treino: "+A.la,20,900,"alimentação");put("Jantar: "+A.ja,45,1140,"alimentação")}
+  put("Treino técnico ("+ptxt+")",Math.round(60*fac),540,"treino");put("Treino físico "+tn+" min: "+foco(p.pos),tn,930,"treino");put("Recuperação: alongamento 15 min + rolo de espuma 10 min",25,1020,"recuperação");
+  if(jm>0)put("Jogos na zona (máx. "+jm+" min)",jm,1170,"jogos")}
+ S.rotina.forEach(function(r){segs(r).forEach(function(q){pl.push([q[0],q[1],r.nome+" (rotina)",cls(r.nome).c])})});pl.sort(function(a,b){return a[0]-b[0]});
+ var col={};CAT.forEach(function(x){col[x[0]]=x[2]});
+ var K=peso?[Math.round(peso*45),Math.round(peso*38),Math.round(peso*1.8),f1(peso*.04)]:null,h='<div class="card"><h2>Resumo</h2><div class="stats"><div class="st"><b>'+f1(sh)+' h</b><span>Sono</span></div><div class="st"><b>'+m2t(w)+'</b><span>Acordar</span></div><div class="st"><b>'+m2t(sl)+'</b><span>Dormir</span></div><div class="st"><b>'+(doente?0:n)+'</b><span>Treinos por semana</span></div><div class="st"><b>'+(doente?0:Math.round(fac*100))+'%</b><span>Carga</span></div></div>'+(sh<need?'<p class="warn">Sono abaixo de '+need+' h: ajusta a rotina.</p>':'')+(mt?'<p><b>'+esc(mt.nome)+'</b> em '+Math.floor(dm)+' dias · <span class="warn">'+fase(dm)+'</span></p>':'')+'</div>';
+ if(doente)h+='<div class="card"><h2>Treino interrompido</h2><p>Doente desde '+esc(p.doenteDesde)+'. Repouso total, '+(peso?f1(peso*.045):"3")+' L de água por dia, banho morno 36 °C por 5 min, sem frio. Ao recuperar, toca em Estou recuperado no Perfil: carga 50% nos 3 primeiros dias, 75% até ao 7.º dia e 100% depois.</p></div>';
+ h+='<div class="card"><h2>Próximos 7 dias</h2>'+wk.map(function(x){return '<div class="row"><b>'+x[0]+'</b><span class="muted">'+x[1]+'</span></div>'}).join("")+'</div>';
+ if(!doente){h+='<div class="card"><h2>Dia de treino</h2>'+pl.map(function(x){return '<div class="row"><div><span class="tag" style="border-color:'+(col[x[3]]||"#8fa398")+'">'+x[3]+'</span> <b>'+esc(x[2])+'</b></div><span class="muted">'+m2t(x[0])+' – '+m2t(x[1])+'</span></div>'}).join("")+'</div>';
+  if(nt.length)h+='<div class="card"><h2>Ajustes pelo teu desempenho</h2><ul>'+nt.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ul></div>'}
+ h+='<div class="card"><h2>Recuperação diária</h2><ul><li>Sono: '+m2t(sl)+' às '+m2t(w)+' ('+f1(sh)+' h)</li><li>Manhã: banho morno 34 °C, 5 min</li><li>Após treino: '+(doente?"banho morno 36 °C, 5 min":p.cron?"banho morno 30 °C, 4 min":"banho frio 15 °C, 3 min, até 30 min depois")+'</li><li>Noite: banho quente 38 °C, 8 min, 2 h antes de dormir</li><li>Alongamento 10 min todos os dias</li></ul></div>';
+ h+='<div class="card"><h2>Alimentação'+(p.pais?' · '+esc(p.pais):'')+'</h2>'+(K?'<div class="stats"><div class="st"><b>'+K[0]+'</b><span>kcal treino</span></div><div class="st"><b>'+K[1]+'</b><span>kcal descanso</span></div><div class="st"><b>'+K[2]+' g</b><span>Proteína</span></div><div class="st"><b>'+K[3]+' L</b><span>Água</span></div></div>':'<p class="muted">Preenche o peso no Perfil para ver kcal, proteína e água.</p>')+'<ul><li>Pequeno-almoço: '+A.pa+'</li><li>Almoço: '+A.al+'</li><li>Lanche: '+A.la+'</li><li>Jantar: '+A.ja+'</li></ul></div>';
+ return h}
+/* ===== v3: manequim animado de exercícios ===== */
+TABS.splice(6,0,['ex','Exercícios']);
+var raf=0,exSel=0,pausa=false,wc=0,t0=performance.now(),LN={t:70,u:38,f:36,th:48,sh:48};
+/* k = [tronco, braço, cotovelo, anca perna perto, joelho perto, anca perna longe, joelho longe] (graus) */
+var EX=[
+{n:'Agachamento',s:'4 × 15',d:'60 s',m:'Quadríceps e glúteos',T:3,x:140,k:[[0,90,0,0,0,0,0],[35,90,0,90,100,90,100]],i:['Pés na largura dos ombros','Desce até as coxas ficarem paralelas ao chão','Joelhos alinhados com os pés, costas retas','Sobe empurrando o chão com os calcanhares']},
+{n:'Afundo',s:'3 × 12 por perna',d:'60 s',m:'Quadríceps, glúteos e equilíbrio',T:3,x:190,k:[[0,0,0,0,0,0,0],[8,0,0,90,90,-25,70]],i:['Dá um passo largo à frente','Desce até o joelho de trás quase tocar o chão','Joelho da frente por cima do tornozelo','Empurra o chão para voltar e troca de perna']},
+{n:'Flexões',s:'4 × 12',d:'60 s',m:'Peito, ombros e tríceps',T:2.4,x:60,k:[[63,0,0,-63,0,-63,0],[75,-75,75,-75,0,-75,0]],i:['Mãos por baixo dos ombros, corpo em linha reta','Desce até o peito ficar a 10 cm do chão','Cotovelos a 45° do tronco','Sobe sem deixar a anca cair']},
+{n:'Prancha',s:'3 × 45 s',d:'30 s',m:'Abdómen e core',T:4,x:50,k:[[77,0,90,-77,0,-77,0],[75,0,90,-75,0,-75,0]],i:['Antebraços no chão, cotovelos por baixo dos ombros','Corpo em linha reta da cabeça aos calcanhares','Abdómen e glúteos contraídos','Respira de forma contínua']},
+{n:'Abdominais',s:'3 × 20',d:'45 s',m:'Abdómen',T:2.4,x:250,k:[[-90,-100,90,120,75,120,75],[-55,-100,90,120,75,120,75]],i:['Deitado de costas, joelhos a 75°','Sobe os ombros até 35° do chão','Queixo afastado do peito','Desce devagar sem relaxar o abdómen']},
+{n:'Ponte de glúteos',s:'3 × 15',d:'45 s',m:'Glúteos e posteriores da coxa',T:3,x:250,k:[[-90,80,0,120,75,120,75],[-137,80,0,95,105,95,105]],i:['Deitado de costas, pés no chão','Sobe a anca até ombros, anca e joelhos ficarem em linha','Aperta os glúteos 2 s no topo','Desce devagar']},
+{n:'Elevação de joelhos',s:'4 × 30 s',d:'30 s',m:'Flexores da anca e coordenação',T:.9,m2:'h',o:1,k:[[5,-45,80,90,90,0,0],[5,-45,80,0,0,90,90]],i:['Sobe o joelho até à altura da anca','Braços alternados a 90°','Apoia só a ponta do pé','Mantém o tronco direito']},
+{n:'Corrida no lugar',s:'5 × 30 s',d:'30 s',m:'Resistência e velocidade de pernas',T:.7,m2:'h',o:1,k:[[12,-50,85,45,70,-35,80],[12,-50,85,-35,80,45,70]],i:['Tronco ligeiramente inclinado à frente','Joelhos a 45° de elevação','Calcanhares sobem até aos glúteos','Cadência de 170 passos por minuto']},
+{n:'Remate',s:'4 × 10 por perna',d:'45 s',m:'Técnica de remate e potência da perna',T:1.6,m2:'h',o:1,k:[[5,-40,30,-40,100,8,15],[-12,40,30,75,10,8,15]],i:['Pé de apoio ao lado da bola, joelho ligeiramente fletido','Leva a perna atrás com o calcanhar junto ao glúteo','Bate na bola com o peito do pé, tornozelo firme','Acompanha o movimento com a perna até à frente']}];
+function rec(p){return /Guarda/.test(p)?[0,1,3]:/central/.test(p)?[0,1,3,2]:/Lateral/.test(p)?[7,6,1]:/defensivo/.test(p)?[7,0,4]:/Médio/.test(p)?[7,6,4]:/Extremo/.test(p)?[7,1,8]:/Avan/.test(p)?[8,0,5]:[0,1,2]}
+function P(k,o){var r=Math.PI/180,sx=function(a){return Math.sin(a*r)},cy=function(a){return Math.cos(a*r)},sh=[LN.t*sx(k[0]),-LN.t*cy(k[0])],hd=[sh[0]+24*sx(k[0]),sh[1]-24*cy(k[0])];
+ function arm(a){var e=[sh[0]+LN.u*sx(a),sh[1]+LN.u*cy(a)];return[e,[e[0]+LN.f*sx(a+k[2]),e[1]+LN.f*cy(a+k[2])]]}
+ function leg(h,j){var n=[LN.th*sx(h),LN.th*cy(h)];return[n,[n[0]+LN.sh*sx(h-j),n[1]+LN.sh*cy(h-j)]]}
+ return{hip:[0,0],sh:sh,hd:hd,a1:arm(k[1]),a2:arm(o?-k[1]:k[1]),l1:leg(k[3],k[4]),l2:leg(k[5],k[6])}}
+function seg(a,b,w,c,op){return `<line x1='${a[0]}' y1='${a[1]}' x2='${b[0]}' y2='${b[1]}' stroke='${c}' stroke-width='${w}' stroke-linecap='round'${op?` opacity='${op}'`:''}/>`}
+function fig(p,dx,dy){function Q(q,s){return[q[0]+dx+(s||0),q[1]+dy]}
+ var H=Q(p.hip),H2=Q(p.hip,-6),S1=Q(p.sh),S2=Q(p.sh,-6),D=Q(p.hd),m=function(l,s){return l.map(function(q){return Q(q,s)})};
+ function limb(s,j,w,op,ft){return seg(s,j[0],w,'var(--ac)',op)+seg(j[0],j[1],w,'var(--ac)',op)+`<circle cx='${j[0][0]}' cy='${j[0][1]}' r='5' fill='#fff' opacity='${op?.2:.35}'/>`+(ft?seg(j[1],[j[1][0]+13,j[1][1]],7,'var(--ac)',op):'')}
+ return limb(S2,m(p.a2,-6),10,.5)+limb(H2,m(p.l2,-6),13,.5,1)+seg(H,S1,19,'var(--ac2)')+limb(H,m(p.l1),13,0,1)+limb(S1,m(p.a1),10,0)+seg(S1,D,6,'var(--tx)')+`<circle cx='${D[0]}' cy='${D[1]}' r='14' fill='var(--tx)'/>`}
+function frame(){var e=EX[exSel],g=$('fg');if(!g)return;if(!pausa)wc=.5-.5*Math.cos(2*Math.PI*(((performance.now()-t0)%(e.T*1000))/(e.T*1000)));
+ var k=e.k[0].map(function(v,i){return v+(e.k[1][i]-v)*wc}),p=P(k,e.o),dx,dy;
+ if(e.m2=='h'){dx=150;dy=200-Math.max(p.l1[1][1],p.l2[1][1])}else{dx=e.x-p.l1[1][0];dy=200-p.l1[1][1]}
+ g.innerHTML=fig(p,dx,dy);raf=requestAnimationFrame(frame)}
+function selEx(i){exSel=i;pausa=false;draw()}
+function vEx(){var p=S.perfil,R=rec(p.pos||''),e=EX[exSel];
+ return `<div class='card'><h2>${e.n}</h2><svg viewBox='0 0 320 210' style='width:100%;max-height:300px;border-radius:12px;background:var(--bg);border:1px solid var(--bd)'><rect x='0' y='204' width='320' height='6' fill='var(--bd)'/><g id='fg'></g></svg><div class='stats' style='margin-top:10px'><div class='st'><b>${e.s}</b><span>Séries × repetições</span></div><div class='st'><b>${e.d}</b><span>Descanso</span></div></div><p class='muted'>${e.m}</p><ol>${e.i.map(function(x){return '<li>'+x+'</li>'}).join('')}</ol><button class='g' onclick="pausa=!pausa;this.textContent=pausa?'Continuar':'Pausar'">Pausar</button></div><div class='card'><h2>Exercícios</h2>${p.pos?`<p class='muted'>★ recomendado para ${esc(p.pos)}</p>`:''}<div style='display:flex;flex-wrap:wrap;gap:6px'>${EX.map(function(x,i){return `<button class='g' style='${i==exSel?'background:var(--ac);color:#04210f;border-color:var(--ac)':''}' onclick='selEx(${i})'>${R.indexOf(i)>=0?'★ ':''}${x.n}</button>`}).join('')}</div></div>`}
+function draw(){clearInterval(tm);cancelAnimationFrame(raf);var f={perfil:vPerfil,carreira:vCarreira,jogos:vJogos,zona:vZona,metas:vMetas,rotina:vRotina,ex:vEx,plano:vPlano}[tab];$('v').innerHTML=f();if(tab=='jogos')tick();if(tab=='ex'){t0=performance.now();frame()}}
+/* ===== v4: rotina por data + ajuste permanente do plano ===== */
+function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
+function diaSel(){return S.cfg.dia||iso(new Date())}
+function dBR(s){return s.split('-').reverse().join('/')}
+function rDia(){var d=diaSel();return S.rotina.filter(function(r){return !r.data||r.data==d})}
+function segs(r){var ok=/^([01]\d|2[0-3]):[0-5]\d$/;if(!r||!ok.test(r.ini||'')||!ok.test(r.fim||''))return[];var a=t2m(r.ini),b=t2m(r.fim);return b>a?[[a,b]]:[[a,1440],[0,b]]}
+function busy(){var o=[];rDia().forEach(function(r){segs(r).forEach(function(s){o.push(s)})});return o.sort(function(a,b){return a[0]-b[0]})}
+function seletorDia(){return `<div class='card'><label>Dia</label><div style='display:flex;gap:8px'><input type='date' value='${diaSel()}' onchange='S.cfg.dia=this.value;sv();draw()'><button class='g' onclick='S.cfg.dia="";sv();draw()'>Hoje</button></div></div>`}
+
+function vRotina(){
+ var h=seletorDia()+`<div class='card'><h2>Adicionar atividade</h2><div class='grid'><div><label>O que fazes</label><input id='ra' placeholder='dormir, banho gelado, treino…'></div><div><label>Início</label><input id='ri' type='time' value='06:00'></div><div><label>Fim</label><input id='rf' type='time' value='07:00'></div><div><label>Data (vazio = todos os dias)</label><input id='rdt' type='date' value='${S.cfg.dia||''}'></div></div><button class='b' onclick='addRot()'>Adicionar</button><p class='muted'>A atividade é reconhecida pelo nome. Com data, vale só nesse dia; sem data, repete todos os dias.</p></div>`;
+ h+=`<div class='card'><h2>Linha do dia · ${dBR(diaSel())}</h2><div class='bar'>${rDia().map(function(r){var k=cls(r.nome).k;return segs(r).map(function(s){return `<i style='left:${s[0]/14.4}%;width:${(s[1]-s[0])/14.4}%;background:${k}'></i>`}).join('')}).join('')}</div><div class='ticks'><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>`;
+ var fr=free();h+=`<p><b class='ok'>Livre:</b> ${fr.length?fr.map(function(f){return m2t(f[0])+' – '+(f[1]==1440?'24:00':m2t(f[1]))}).join(' · '):'nenhum'}</p></div><div class='card'><h2>Atividades</h2>`;
+ var ativos=rDia();
+ S.rotina.slice().sort(function(a,b){return (a.data||'').localeCompare(b.data||'')||t2m(a.ini)-t2m(b.ini)}).forEach(function(r){var c=cls(r.nome),bt=c.c=='banho'?banhoTipo(r.nome):'';
+  h+=`<div class='row' style='${ativos.indexOf(r)<0?'opacity:.55':''}'><div><b>${esc(r.nome)}</b> <span class='tag' style='border-color:${c.k}'>${c.c}</span> <span class='tag'>${r.data?dBR(r.data):'todos os dias'}</span><br><span class='muted'>${r.ini} – ${r.fim}${bt?' · banho '+bt:''}</span></div><button class='g' onclick="del('rotina','${r.id}')">✕</button></div>`});
+ return h+(S.rotina.length?'':`<p class='muted'>Sem atividades.</p>`)+'</div>'}
+
+function addRot(){var n=val('ra').trim(),a=val('ri'),b=val('rf'),d=val('rdt');if(!n)return;
+ if(!a||!b||a==b){alert('Indica um início e um fim diferentes.');return}
+ var nr={id:uid(),nome:n,ini:a,fim:b,data:d},old=S.cfg.dia,ov=false;S.cfg.dia=d||old;
+ busy().forEach(function(s){segs(nr).forEach(function(q){if(q[0]<s[1]&&q[1]>s[0])ov=true})});S.cfg.dia=old;
+ if(ov&&!confirm('Esse horário colide com outra atividade. Adicionar mesmo assim?'))return;
+ S.rotina.push(nr);if(d)S.cfg.dia=d;sv();draw()}
+
+/* plano: usa a rotina do dia escolhido e termina com os ajustes */
+function vPlano(){var p=S.perfil;if(!p.pos)return `<div class='card'><p>Escolhe a posição no Perfil, ou toca em Sugerir posições, para gerar o plano.</p></div>`;
+ var all=S.rotina,h;S.rotina=rDia();try{h=plano()}finally{S.rotina=all}
+ return seletorDia()+`<div class='card'><label>Máx. de jogos na zona por dia (min)</label><input type='number' value='${S.cfg.jogoMax||0}' onchange='S.cfg.jogoMax=+this.value;sv();draw()'></div>`+h+ajuste()}
+function ajuste(){var c=S.cfg,p=S.perfil;
+ return `<div class='card'><h2>Ajustar o plano</h2><p class='muted'>O plano recalcula sempre que alteras o Perfil, a Rotina, os Jogos, as Metas ou os valores abaixo.</p><div class='grid'>`+
+ Sx('Dias de treino por semana','aj1',[['','Automático'],['3','3'],['4','4'],['5','5'],['6','6']],c.dias||'')+
+ Sx('Carga dos treinos','aj2',[['','Automática'],['40','40%'],['60','60%'],['80','80%'],['100','100%']],c.carga||'')+
+ `</div><label style='display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--tx)'><input type='checkbox' ${p.doente?'checked':''} style='width:auto' onchange='ajDoente(this.checked)'> Estou doente (parar treinos)</label><button class='b' onclick='ajAplicar()'>Aplicar</button> <button class='g' onclick='ajRepor()'>Repor automático</button>`+
+ `<h2 style='margin-top:16px'>Adicionar sessão a ${dBR(diaSel())}</h2><div class='grid'>${I('Atividade','qa','')}${I('Início','qi','17:00','time')}${I('Fim','qf','18:00','time')}</div><button class='b' onclick='qAdd()'>Adicionar ao dia</button></div>`}
+function ajAplicar(){S.cfg.dias=val('aj1');S.cfg.carga=val('aj2');sv();draw()}
+function ajRepor(){S.cfg.dias='';S.cfg.carga='';sv();draw()}
+function ajDoente(v){var p=S.perfil;p.doente=v;if(v)p.doenteDesde=new Date().toLocaleDateString('pt-PT');else p.recuperadoEm=new Date().toISOString();sv();draw()}
+function qAdd(){var n=val('qa').trim(),a=val('qi'),b=val('qf');if(!n||!a||!b||a==b)return;S.rotina.push({id:uid(),nome:n,ini:a,fim:b,data:diaSel()});sv();draw()}
+nav();draw();
+/* ===== v5: Dribles por posição + Conversas ===== */
+var DRI=[
+{n:'Finta de corpo',c:'Inclina o ombro e o peso para um lado e sai pelo outro com o pé de fora',q:'Defesa de frente e parado',t:'4 × 10 por lado · 30 s de descanso',e:'Mexer só os pés, sem o ombro'},
+{n:'Pedalada',c:'Passa o pé por cima da bola 2 vezes e sai para o lado contrário com o pé de fora',q:'1x1 junto à linha lateral',t:'4 × 8 por perna · 30 s',e:'Bola longe do corpo na saída'},
+{n:'Elástico',c:'Empurra a bola com o exterior do pé e puxa-a de volta com o interior, sem a pousar',q:'Defesa a recuar',t:'4 × 10 por pé · 30 s',e:'Toque demasiado forte'},
+{n:'Corte para dentro',c:'Conduz com o pé de fora, corta para o pé forte e remata ou passa',q:'Defesa a fechar o interior',t:'5 × 6 por lado · 45 s',e:'Cortar sem olhar para a baliza'},
+{n:'Roleta',c:'Pisa a bola e gira 360° com o corpo entre ela e o adversário',q:'Pressão por trás',t:'4 × 8 por lado · 30 s',e:'Perder o apoio ao girar'},
+{n:'Cruyff',c:'Finge passe ou remate, puxa a bola atrás da perna de apoio com o interior e vira 180°',q:'Pressão pela frente com espaço atrás',t:'4 × 10 por pé · 30 s',e:'Fintar sem mexer o corpo todo'},
+{n:'Caneta',c:'Passa a bola entre as pernas do adversário e acelera pelo lado',q:'Defesa com as pernas abertas',t:'3 × 8 · 30 s',e:'Usar na zona onde perder a bola custa golo'},
+{n:'Proteção de bola',c:'Costas para o adversário, braço aberto, bola no pé mais afastado dele',q:'Receção de costas para a baliza',t:'4 × 45 s · 30 s',e:'Deixar a bola entre os dois pés'},
+{n:'Condução em velocidade',c:'Toques longos com o exterior, 1 toque a cada 2 passos e cabeça levantada',q:'Contra-ataque com espaço livre',t:'6 × 30 m · 45 s',e:'Olhar só para a bola'},
+{n:'Receção orientada',c:'1.º toque para o lado contrário à pressão, já a sair de frente',q:'Pressão atrás de ti',t:'4 × 10 por pé · 30 s',e:'Parar a bola antes de decidir'},
+{n:'Drible curto de saída',c:'Toque lateral curto com o interior para atrair o pressionante e passar ao espaço livre',q:'Pressão alta no teu terço',t:'4 × 10 por pé · 30 s',e:'Driblar sem ter linha de passe'}];
+function driPos(x){return /Guarda/.test(x)?[10,9,7]:/central/.test(x)?[10,9,8]:/Lateral/.test(x)?[3,1,8]:/defensivo/.test(x)?[5,9,7]:/centro/.test(x)?[4,5,9]:/ofensivo/.test(x)?[2,6,5]:/Extremo/.test(x)?[1,2,3]:[7,0,9]}
+function driZona(x){return /Guarda|central/.test(x)?'Nunca dribles no teu terço defensivo: só para atrair 1 pressionante e passar.':/Lateral/.test(x)?'Dribla no corredor a partir do meio-campo e deixa sempre cobertura atrás de ti.':/defensivo|centro/.test(x)?'Dribla no meio só com 2 colegas livres para apoio: perder a bola aqui custa um golo.':'No último terço arrisca, perder ali custa pouco. No teu meio-campo, passa.'}
+function dicaDia(){var p=S.perfil,d=dsem(new Date()),nx=proxJ(),h=nx?(new Date(nx.data)-new Date())/36e5:999,
+ L=['Técnica lenta: 1 drible novo, 3 × 10 em passo e 3 × 10 a 70% da velocidade','Velocidade: 2 dribles da tua posição, 6 × 20 m com cones a 5 m','Decisão: jogo reduzido 3 contra 3 em 20 × 15 m, com 1 drible obrigatório por posse','Pé fraco: 20 min de dribles só com o outro pé','Ativação: 20 min com os 2 dribles que já dominas, sem chegar ao cansaço','Jogo: aplica 1 drible planeado por parte e anota quantos resultam','Descanso ativo: 10 min de vídeo de um jogador da tua posição e anota 3 dribles'],t=L[d];
+ if(h<48)t='Jogo em '+Math.round(h)+' h: só os 2 dribles que já dominas, 15 min, sem exaustão';
+ if(p.pe2&&p.pe2!='Ambos'&&h>=48)t+=' + 10 min com o pé '+(p.pe=='Direito'?'esquerdo':'direito');
+ return t}
+function driHtml(i){var d=DRI[i];return `<details style='padding:8px 0;border-top:1px solid var(--bd)'><summary><b>${d.n}</b></summary><ul><li>Como: ${d.c}</li><li>Quando: ${d.q}</li><li>Treino: ${d.t}</li><li>Erro comum: ${d.e}</li></ul></details>`}
+function vDri(){var p=S.perfil;if(!p.pos)return `<div class='card'><p>Escolhe a posição no Perfil para ver os dribles certos para ela.</p></div>`;
+ var ids=driPos(p.pos);if(p.doente)return `<div class='card'><p class='warn'>Doente: sem treino de dribles até te recuperares.</p></div>`;
+ return `<div class='card'><h2>Conselho de hoje · ${DN[dsem(new Date())]}</h2><p>${dicaDia()}</p></div>`+
+ `<div class='card'><h2>Dribles de ${esc(p.pos)}</h2><p class='muted'>${driZona(p.pos)}</p>${ids.map(driHtml).join('')}</div>`+
+ `<div class='card'><h2>Como escolher o drible certo</h2><ol><li>Onde está o espaço atrás do defesa?</li><li>Qual é o pé de apoio e para onde está o peso dele?</li><li>Quantos colegas cobrem se perderes a bola? Se forem 0 e estás no teu meio-campo, passa.</li></ol><p class='muted'>Faz 2 olhares por cima do ombro antes de receber a bola.</p></div>`+
+ `<div class='card'><h2>Outros dribles</h2>${DRI.map(function(d,i){return ids.indexOf(i)<0?driHtml(i):''}).join('')}</div>`}
+
+function proxJ(){return S.jogos.filter(function(j){return !j.jogado&&new Date(j.data)>new Date()}).sort(function(a,b){return new Date(a.data)-new Date(b.data)})[0]}
+function resp(q){q=q.toLowerCase();var p=S.perfil,s=stats(S.jogos.concat(S.zona)),id=+p.idade||0;
+ if(p.doente&&/trein|plano|dribl/.test(q))return 'Estás doente desde '+p.doenteDesde+': repouso total até te recuperares.';
+ if(/dribl|finta/.test(q))return p.pos?dicaDia():'Escolhe primeiro a posição no Perfil.';
+ if(/jogo|partida/.test(q)){var j=proxJ();if(!j)return 'Não há jogos futuros registados.';var h=(new Date(j.data)-new Date())/36e5;return 'Próximo jogo: '+j.adv+' em '+Math.floor(h/24)+' d '+Math.round(h%24)+' h.'}
+ if(/meta|peneira/.test(q)){var m=proxMeta();if(!m)return 'Não há metas futuras.';var d=(new Date(m.data)-new Date())/864e5;return m.nome+' em '+Math.floor(d)+' dias. Fase: '+fase(d)+'.'}
+ if(/golo|assist|nota|estat/.test(q))return s.j?'Jogos '+s.j+', golos '+s.g+', assistências '+s.a+', G/A por jogo '+f1(s.gapj)+', nota média '+(s.nn?f1(s.nota):'sem nota')+'.':'Ainda não registaste jogos.';
+ if(/sono|dorm/.test(q))return 'Precisas de '+(id&&id<=13?10:id&&id<=17?9:8)+' h de sono por noite.';
+ if(/comer|aliment|fome/.test(q))return 'Faz 4 refeições por dia. Os valores exatos estão na aba Plano.';
+ if(/trein|plano/.test(q))return 'O plano está na aba Plano. Em Ajustar o plano mudas os dias e a carga.';
+ return 'Pergunta-me sobre dribles, próximo jogo, metas, estatísticas, sono, alimentação ou plano.'}
+function vCon(){S.chat=S.chat||[];S.conv=S.conv||[];
+ var h=`<div class='card'><h2>Treinador virtual</h2><div id='ch' style='max-height:300px;overflow:auto'>${S.chat.map(function(m){var u=m[0]=='u';return `<div style='margin:6px 0;text-align:${u?'right':'left'}'><span style='display:inline-block;max-width:85%;padding:8px 10px;border-radius:12px;text-align:left;${u?'background:var(--ac);color:#04210f':'background:var(--bg);border:1px solid var(--bd)'}'>${esc(m[1])}</span></div>`}).join('')}</div><div style='display:flex;gap:8px;margin-top:8px'><input id='cq' placeholder='Dribles, próximo jogo, sono…' onkeydown='if(event.key=="Enter")cEnv()'><button class='b' style='margin:0' onclick='cEnv()'>Enviar</button></div><p class='muted'>As respostas usam os teus dados, sem internet.</p></div>`+
+ `<div class='card'><h2>Conversas com outros e comigo</h2><div class='grid'>${Sx('Com quem','cw',['Comigo','Treinador','Colega','Empresário','Família','Outro'],'')}${I('Nome (opcional)','cn2','')}</div><label style='margin-top:8px'>O que foi falado ou aprendido</label><input id='ct' placeholder='Ex.: treinador pediu mais remates de primeira'><button class='b' onclick='cSav()'>Guardar conversa</button>`+
+ S.conv.slice().reverse().map(function(c){return `<div class='row'><div><span class='tag'>${esc(c.w)}${c.n?' · '+esc(c.n):''}</span> <span class='muted'>${c.d}</span><br>${esc(c.t)}</div><button class='g' onclick="del('conv','${c.id}')">✕</button></div>`}).join('')+(S.conv.length?'':`<p class='muted'>Sem conversas guardadas.</p>`)+`</div>`;return h}
+function cEnv(){var q=val('cq').trim();if(!q)return;S.chat.push(['u',q]);S.chat.push(['b',resp(q)]);S.chat=S.chat.slice(-30);sv();draw();var c=$('ch');if(c)c.scrollTop=c.scrollHeight}
+function cSav(){var t=val('ct').trim();if(!t)return;S.conv.push({id:uid(),w:val('cw'),n:val('cn2'),d:new Date().toLocaleDateString('pt-PT'),t:t});sv();draw()}
+
+var draw0=draw;draw=function(){if(tab=='dri'||tab=='con'){clearInterval(tm);$('v').innerHTML=(tab=='dri'?vDri:vCon)()}else draw0()};
+var ixp=TABS.map(function(x){return x[0]}).indexOf('plano');TABS.splice(ixp<0?TABS.length:ixp,0,['dri','Dribles'],['con','Conversas']);
+nav();draw();
+/* ===== v6: manequim animado a executar os dribles (autónomo) ===== */
+var mqRaf=0,mqT0=0,driSel=-1,mqPause=false,mqW=0;
+/* frame = [tronco, braço, cotovelo, anca perto, joelho perto, anca longe, joelho longe, bola x, bola altura]
+   DA[i] = [segundos, posição x do adversário (0 = sem), pernas abertas (1/0), frames] — mesma ordem de DRI */
+var DA=[
+[2.4,105,0,[[8,-30,60,15,10,8,15,30,0],[28,-10,50,35,30,8,15,30,0],[-6,-40,70,32,2,8,15,58,0],[8,-30,60,15,10,8,15,36,0]]],
+[2.4,105,0,[[8,-30,60,15,10,8,15,30,0],[14,-30,60,50,40,8,15,30,0],[8,-30,60,32,2,8,15,58,0],[8,-30,60,15,10,8,15,36,0]]],
+[2.4,105,0,[[8,-30,60,20,15,8,15,30,0],[10,-30,60,35,20,8,15,48,0],[8,-30,60,12,8,8,15,24,0],[12,-30,60,40,15,8,15,62,0]]],
+[2.4,105,0,[[8,-30,60,25,20,8,15,34,0],[16,-20,50,35,25,8,15,42,0],[-4,-40,70,20,10,8,15,34,0],[18,-20,50,45,15,8,15,64,0]]],
+[2.6,-85,0,[[10,-30,60,30,5,8,15,40,0],[14,-30,60,25,35,8,15,14,0],[0,-40,80,10,10,8,15,-6,0],[8,-30,60,15,10,8,15,30,0]]],
+[2.8,105,0,[[10,-30,60,-25,60,8,15,30,0],[4,-30,60,45,10,8,15,30,0],[-4,-40,70,-10,0,8,15,-22,0],[14,-20,50,25,10,8,15,40,0]]],
+[2.6,105,1,[[8,-30,60,15,10,8,15,30,0],[10,-30,60,32,2,8,15,50,0],[12,-30,60,25,10,8,15,105,0],[14,-20,50,40,10,8,15,150,0]]],
+[2.4,-85,0,[[20,-60,90,20,30,8,15,18,0],[24,-70,90,28,25,8,15,22,0],[20,-60,90,20,30,8,15,18,0],[16,-70,90,24,28,8,15,24,0]]],
+[.9,0,0,[[14,-50,85,45,70,-35,80,52,0],[14,-50,85,5,10,5,10,50,0],[14,50,85,-35,80,45,70,66,0],[14,50,85,5,10,5,10,56,0]]],
+[2.6,-90,0,[[8,-30,60,0,0,8,15,-70,0],[8,-30,60,-8,10,8,15,-26,0],[14,-30,60,25,10,8,15,40,0],[14,-30,60,15,10,8,15,52,0]]],
+[2.8,85,0,[[8,-30,60,15,10,8,15,26,0],[10,-30,60,22,10,8,15,34,0],[8,-20,50,38,2,8,15,60,0],[8,-30,60,15,10,8,15,140,0]]]];
+
+function mqP(k,o){var r=Math.PI/180,sx=function(a){return Math.sin(a*r)},cy=function(a){return Math.cos(a*r)},L={t:70,u:38,f:36,th:48,sh:48},sh=[L.t*sx(k[0]),-L.t*cy(k[0])],hd=[sh[0]+24*sx(k[0]),sh[1]-24*cy(k[0])];
+ function arm(a){var e=[sh[0]+L.u*sx(a),sh[1]+L.u*cy(a)];return[e,[e[0]+L.f*sx(a+k[2]),e[1]+L.f*cy(a+k[2])]]}
+ function leg(h,j){var n=[L.th*sx(h),L.th*cy(h)];return[n,[n[0]+L.sh*sx(h-j),n[1]+L.sh*cy(h-j)]]}
+ return{hip:[0,0],sh:sh,hd:hd,a1:arm(k[1]),a2:arm(o?-k[1]:k[1]),l1:leg(k[3],k[4]),l2:leg(k[5],k[6])}}
+function mqS(a,b,w,c,op){return `<line x1='${a[0]}' y1='${a[1]}' x2='${b[0]}' y2='${b[1]}' stroke='${c}' stroke-width='${w}' stroke-linecap='round'${op?` opacity='${op}'`:''}/>`}
+function mqF(p,dx,dy,c1,c2,op){function Q(q,s){return[q[0]+dx+(s||0),q[1]+dy]}var m=function(l,s){return l.map(function(q){return Q(q,s)})},H=Q(p.hip),H2=Q(p.hip,-6),S1=Q(p.sh),S2=Q(p.sh,-6),D=Q(p.hd),hc=c1==='var(--ac)'?'var(--tx)':c1;
+ function limb(s,j,w,o2,ft){var oo=op||o2;return mqS(s,j[0],w,c1,oo)+mqS(j[0],j[1],w,c1,oo)+`<circle cx='${j[0][0]}' cy='${j[0][1]}' r='5' fill='#fff' opacity='.3'/>`+(ft?mqS(j[1],[j[1][0]+13,j[1][1]],7,c1,oo):'')}
+ return limb(S2,m(p.a2,-6),10,.5)+limb(H2,m(p.l2,-6),13,.5,1)+mqS(H,S1,19,c2,op)+limb(H,m(p.l1),13,0,1)+limb(S1,m(p.a1),10,0)+mqS(S1,D,6,hc,op)+`<circle cx='${D[0]}' cy='${D[1]}' r='14' fill='${hc}'${op?` opacity='${op}'`:''}/>`}
+function mqLoop(){var g=$('mqg');if(!g)return;var a=DA[driSel],n=a[3].length;
+ if(!mqPause)mqW=((performance.now()-mqT0)%(a[0]*1000))/(a[0]*1000);
+ var x=mqW*n,i=Math.floor(x)%n,u=x-Math.floor(x),w=u*u*(3-2*u),f0=a[3][i],f1=a[3][(i+1)%n],k=f0.map(function(v,j){return v+(f1[j]-v)*w}),p=mqP(k.slice(0,7),1),dy=200-Math.max(p.l1[1][1],p.l2[1][1]),s='';
+ if(a[1]){var o=mqP(a[2]?[6,-20,40,26,10,-22,10]:[6,-20,40,12,15,-8,15],1),cx=150+a[1],oy=200-Math.max(o.l1[1][1],o.l2[1][1]),f=mqF(o,cx,oy,'var(--mu)','var(--mu)',.55);s+=a[1]>0?`<g transform='translate(${2*cx},0) scale(-1,1)'>${f}</g>`:f}
+ s+=mqF(p,150,dy,'var(--ac)','var(--ac2)')+`<circle cx='${150+k[7]}' cy='${196-k[8]}' r='8' fill='#fff' stroke='#222' stroke-width='1.5'/>`;
+ g.innerHTML=s;mqRaf=requestAnimationFrame(mqLoop)}
+function mqSel(i){driSel=i;mqPause=false;draw()}
+function mqCard(){var p=S.perfil,R=p.pos?driPos(p.pos):[];if(driSel<0)driSel=R.length?R[0]:0;var d=DRI[driSel];
+ return `<div class='card'><h2>${d.n}</h2><svg viewBox='0 0 320 210' style='width:100%;max-height:300px;border-radius:12px;background:var(--bg);border:1px solid var(--bd)'><rect x='0' y='204' width='320' height='6' fill='var(--bd)'/><g id='mqg'></g></svg><p>${d.c}</p><p class='muted'>Tu a verde, adversário a cinzento, bola branca.</p><button class='g' onclick="mqPause=!mqPause;this.textContent=mqPause?'Continuar':'Pausar'">Pausar</button><div style='display:flex;flex-wrap:wrap;gap:6px;margin-top:10px'>${DRI.map(function(x,i){return `<button class='g' style='${i==driSel?'background:var(--ac);color:#04210f;border-color:var(--ac)':''}' onclick='mqSel(${i})'>${R.indexOf(i)>=0?'★ ':''}${x.n}</button>`}).join('')}</div></div>`}
+var vDri0=vDri;vDri=function(){return mqCard()+vDri0()};
+var draw1=draw;draw=function(){cancelAnimationFrame(mqRaf);draw1();if(tab=='dri'){mqT0=performance.now();mqLoop()}};
+nav();draw();
+/* ===== v7: registos, sessões, análise, tática, biblioteca, definições ===== */
+S.reg=S.reg||{};S.heat=S.heat||[];S.tat=S.tat||{f:'4-3-3',p:{}};S.chk=S.chk||{};
+function iso7(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
+function dBR7(s){return String(s).split('-').reverse().join('/')}
+function hrs(a,b){return((t2m(b)-t2m(a)+1440)%1440)/60}
+function med7(a){return a.length?a.reduce(function(x,y){return x+y},0)/a.length:0}
+var NUM='number',TXT='text';
+/* [nome, campos[chave, rótulo, tipo, opções]] */
+var R7={
+med:['Medidas',[['alt','Altura (cm)',NUM],['peso','Peso (kg)',NUM]]],
+tst:['Testes físicos',[['t','Teste','sel',['30 m (s)','Yo-Yo (nível)','Salto vertical (cm)','Agilidade (s)']],['v','Resultado',NUM]]],
+cmp:['Composição corporal',[['gord','Gordura (%)',NUM],['mus','Massa muscular (kg)',NUM]]],
+fc:['Frequência cardíaca',[['bpm','Em repouso (bpm)',NUM]]],
+dor:['Dor e cansaço',[['dor','Dor (0 a 10)',NUM],['can','Cansaço (0 a 10)',NUM]]],
+sono:['Sono real',[['dm','Dormiu às','time'],['ac','Acordou às','time'],['q','Qualidade (1 a 5)',NUM]]],
+ref:['Refeições',[['r','Refeição','sel',['Pequeno-almoço','Almoço','Lanche','Jantar']],['desc','O que comeste',TXT],['kcal','kcal (opcional)',NUM]]],
+hum:['Humor e confiança',[['h','Humor (1 a 10)',NUM],['c','Confiança (1 a 10)',NUM],['n','Nota',TXT]]],
+ses:['Carga dos treinos',[['t','Treino',TXT],['min','Minutos',NUM],['rpe','Esforço (1 a 10)',NUM]]],
+ser:['Séries e repetições',[['ex','Exercício',TXT],['se','Séries',NUM],['re','Repetições',NUM],['kg','Carga (kg)',NUM]]],
+les:['Lesões',[['p','Parte do corpo',TXT],['g','Gravidade','sel',['Leve','Moderada','Grave']],['dias','Dias fora',NUM]]],
+con:['Contratos',[['cl','Clube',TXT],['fim','Termina em','date'],['sal','Salário',TXT]]],
+ctt:['Treinadores e colegas',[['nm','Nome',TXT],['fn','Função',TXT],['cl','Clube',TXT],['ct','Contacto',TXT]]],
+cls:['Classificação',[['eq','Equipa',TXT],['j','Jogos',NUM],['pt','Pontos',NUM]]],
+cnv:['Convocatórias',[['adv','Adversário',TXT],['es','Estado','sel',['Titular','Suplente','Fora']]]],
+trf:['Troféus e prémios',[['ti','Título',TXT],['ep','Época ou ano',TXT]]],
+av:['Estatísticas avançadas',[['adv','Adversário',TXT],['pc','Passes certos',NUM],['pt','Passes tentados',NUM],['rm','Remates',NUM],['rb','Remates à baliza',NUM],['dg','Duelos ganhos',NUM],['dt','Duelos totais',NUM],['ca','Amarelos',NUM],['cv','Vermelhos',NUM]]],
+pos:['Análise pós-jogo',[['j','Jogo',TXT],['b','O que fiz bem',TXT],['e','O que errei',TXT],['t','O que treino esta semana',TXT]]],
+vid:['Vídeos',[['tp','Tipo','sel',['Apresentação','Jogo']],['l','Link',TXT],['m','Minuto (mm:ss)',TXT],['n','Nota',TXT]]],
+cns:['Consultas e exames',[['o','O quê',TXT],['hr','Hora','time']]],
+pen:['Peneiras',[['cl','Clube',TXT],['lc','Local',TXT],['ct','Contacto',TXT],['es','Estado','sel',['Interessado','Inscrito','Feito','Aprovado','Não passei']]]],
+mst:['Metas de estatísticas',[['s','Estatística','sel',['Golos','Assistências','Jogos','Minutos']],['al','Alvo',NUM]]]};
+var SM={
+tst:function(l){var g={};l.forEach(function(e){(g[e.t]=g[e.t]||[]).push(+e.v)});return Object.keys(g).map(function(t){var a=g[t],b=/\(s\)/.test(t)?Math.min.apply(0,a):Math.max.apply(0,a);return t+': melhor '+b+' · último '+a[a.length-1]}).join('<br>')},
+fc:function(l){if(l.length<2)return'';var a=l.map(function(e){return+e.bpm}),u=a[a.length-1],m=med7(a.slice(-8,-1));return 'Média anterior '+Math.round(m)+' bpm · último '+u+' bpm'+(u>=m+7?' <b class="warn">+7 bpm: reduz a carga hoje</b>':'')},
+dor:function(l){var e=l[l.length-1];return e&&(+e.dor>=7||+e.can>=8)?'<b class="warn">Dor ou cansaço alto: carga 40% hoje; se a dor durar 3 dias, consulta um médico.</b>':''},
+sono:function(l){var a=l.slice(-7).map(function(e){return hrs(e.dm,e.ac)});return a.length?'Média de '+f1(med7(a))+' h nos últimos '+a.length+' registos':''},
+hum:function(l){var a=l.slice(-7);return a.length?'Humor médio '+f1(med7(a.map(function(e){return+e.h})))+' · confiança média '+f1(med7(a.map(function(e){return+e.c}))):''},
+ses:function(l){var n=Date.now(),L=function(a,b){return l.filter(function(e){var d=(n-new Date(e.d))/864e5;return d>=a&&d<b}).reduce(function(s,e){return s+e.min*e.rpe},0)},ag=L(0,7),cr=L(7,35)/4;return 'Carga dos últimos 7 dias: '+ag+' UA'+(cr?' · rácio '+f1(ag/cr)+(ag/cr>1.5?' <b class="warn">acima de 1,5: risco de lesão, reduz a carga</b>':ag/cr<.8?' (abaixo de 0,8: podes subir a carga)':' (zona segura: 0,8 a 1,5)'):'')},
+les:function(l){return l.length?'Retorno: fase 1 (dor 0 a 2 em caminhada de 20 min), fase 2 corrida leve a 40%, fase 3 treino sem contacto a 60%, fase 4 treino coletivo a 80%, fase 5 jogo com 30, 60 e depois 90 min. Só avanças com dor até 2 durante 24 h.':''},
+cls:function(l){return l.slice().sort(function(a,b){return b.pt-a.pt}).map(function(e,i){return (i+1)+'. '+esc(e.eq)+' · '+e.pt+' pts em '+e.j+' jogos'}).join('<br>')},
+av:function(l){var t=function(k){return l.reduce(function(s,e){return s+(+e[k]||0)},0)},p=function(a,b){return t(b)?Math.round(t(a)/t(b)*100)+'%':'–'};return 'Passes certos '+p('pc','pt')+' · remates à baliza '+p('rb','rm')+' · duelos ganhos '+p('dg','dt')+' · amarelos '+t('ca')+' · vermelhos '+t('cv')},
+mst:function(l){var s=stats(S.jogos),v={Golos:s.g,'Assistências':s.a,Jogos:s.j,Minutos:s.min};return l.map(function(e){var c=v[e.s]||0,p=Math.min(100,Math.round(c/e.al*100));return e.s+': '+c+' de '+e.al+' ('+p+'%)<div class="bar" style="height:10px"><i style="left:0;width:'+p+'%;background:var(--ac)"></i></div>'}).join('')}};
+function rSel(k){S.cfg.rs=k;sv();draw()}
+function rDel(k,id){S.reg[k]=S.reg[k].filter(function(e){return e.id!=id});sv();draw()}
+function rAdd(){var k=S.cfg.rs||'med',e={id:uid(),d:val('rd7')},ok=false;R7[k][1].forEach(function(f){e[f[0]]=val('rf_'+f[0]);if(e[f[0]]!=='')ok=true});if(!ok)return;(S.reg[k]=S.reg[k]||[]).push(e);
+ if(k=='med'){if(e.alt)S.perfil.alt=e.alt;if(e.peso)S.perfil.peso=e.peso}sv();draw()}
+function vReg(){var k=S.cfg.rs||'med',D=R7[k],l=(S.reg[k]||[]).slice().sort(function(a,b){return(a.d||'').localeCompare(b.d||'')});
+ return `<div class='card'><h2>Registos</h2><div style='display:flex;flex-wrap:wrap;gap:6px'>${Object.keys(R7).map(function(x){return `<button class='g' style='${x==k?'background:var(--ac);color:#04210f;border-color:var(--ac)':''}' onclick='rSel("${x}")'>${R7[x][0]}</button>`}).join('')}</div></div>`+
+ `<div class='card'><h2>${D[0]}</h2><div class='grid'>${I('Data','rd7',iso7(new Date()),'date')}${D[1].map(function(f){return f[2]=='sel'?Sx(f[1],'rf_'+f[0],f[3],''):I(f[1],'rf_'+f[0],'',f[2])}).join('')}</div><button class='b' onclick='rAdd()'>Guardar</button>${SM[k]&&l.length?`<p>${SM[k](l)}</p>`:''}`+
+ l.slice().reverse().map(function(e){return `<div class='row'><div class='muted'>${e.d?dBR7(e.d)+' · ':''}${D[1].map(function(f){return e[f[0]]!==''&&e[f[0]]!=null?f[1]+': '+esc(e[f[0]]):''}).filter(Boolean).join(' · ')}</div><button class='g' onclick='rDel("${k}","${e.id}")'>✕</button></div>`}).join('')+`</div>`}
+
+/* sessões guiadas com temporizador */
+var SS={
+'Aquecimento':[1,[['Corrida leve',180,0],['Mobilidade da anca',60,0],['Skipping',45,15],['Passos laterais',45,15],['Aceleração de 20 m',20,40]]],
+'Retorno à calma':[1,[['Caminhada',120,0],['Alongar quadríceps',40,5],['Alongar posteriores',40,5],['Alongar gémeos',40,5],['Alongar glúteos',40,5],['Respiração profunda',60,0]]],
+'Mobilidade e alongamento':[1,[['Rotação do tronco',30,5],['Gato-camelo',40,5],['Afundo com rotação',40,5],['Abertura da anca',40,5],['Agachamento profundo',40,5],['Alongar adutores',40,5],['Alongar flexores da anca',40,5],['Alongar posteriores',40,5]]],
+'Treino em casa (sem material)':[3,[['Agachamento',40,20],['Flexões',40,20],['Afundos alternados',40,20],['Prancha',40,20],['Elevação de joelhos',40,20],['Ponte de glúteos',40,20]]],
+'Ginásio (pesos)':[4,[['Agachamento com barra: 8 repetições',45,90],['Levantamento terra romeno: 8 repetições',45,90],['Avanço com halteres: 10 por perna',60,60],['Remada: 10 repetições',45,60]]],
+'Campo com cones':[4,[['Slalom em 8 cones',30,60],['Passe e movimento',60,60],['Sprints de 20 m',20,70],['Condução em zigue-zague',30,60]]],
+'Bolas paradas':[3,[['10 livres diretos',120,30],['10 penáltis',120,30],['10 cantos',120,30]]],
+'Respiração 4-7-8':[6,[['Inspira (4 s)',4,0],['Segura (7 s)',7,0],['Expira (8 s)',8,0]]],
+'Visualização pré-jogo':[1,[['Respira fundo',60,0],['Imagina o aquecimento',60,0],['Imagina 3 ações certas da tua posição',90,0],['Imagina um erro e a tua reação',60,0],['Foco na 1.ª ação do jogo',30,0]]]};
+var sesTm=0,sq=[],si=0,sl7=0,sRun=false,sNome='';
+function sesMin(d){return Math.round(d[0]*d[1].reduce(function(s,x){return s+x[1]+x[2]},0)/60)}
+function sesIni(n){var d=SS[n];sq=[];for(var r=1;r<=d[0];r++)d[1].forEach(function(s){sq.push([s[0],s[1],'Volta '+r+'/'+d[0],1]);if(s[2])sq.push(['Descanso',s[2],'Volta '+r+'/'+d[0],0])});sNome=n;si=0;sl7=sq[0][1];sRun=false;clearInterval(sesTm);draw()}
+function sesRender(){var e=$('sesBox');if(!e)return;var c=sq[si];e.innerHTML=!sq.length?`<p class='muted'>Escolhe uma sessão.</p>`:c?`<div class='stats'><div class='st'><b style='font-size:36px;color:${c[3]?'var(--ac)':'var(--ac2)'}'>${sl7} s</b><span>${esc(c[0])}</span></div></div><p class='muted'>${sNome} · ${c[2]} · passo ${si+1}/${sq.length}${sq[si+1]?' · a seguir: '+esc(sq[si+1][0]):''}</p>`:`<p class='ok'>Sessão concluída: ${sNome}.</p>`}
+function bip(){try{var a=new (window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator();o.connect(a.destination);o.frequency.value=880;o.start();o.stop(a.currentTime+.25)}catch(e){}if(navigator.vibrate)navigator.vibrate(200)}
+function sesTick(){if(!sRun)return;sl7--;if(sl7<=0){bip();si++;if(si>=sq.length){sRun=false;clearInterval(sesTm);sesRender();return}sl7=sq[si][1]}sesRender()}
+function sesGo(){if(!sq.length)return;if(si>=sq.length){si=0;sl7=sq[0][1]}sRun=!sRun;clearInterval(sesTm);if(sRun)sesTm=setInterval(sesTick,1000);$('sbtn').textContent=sRun?'Pausar':'Continuar'}
+function sesSkip(){if(si<sq.length-1){si++;sl7=sq[si][1];sesRender()}}
+function ciclo(){var i=S.cfg.ini7;if(!i){i=S.cfg.ini7=iso7(new Date());sv()}var w=Math.floor((new Date(iso7(new Date()))-new Date(i))/6048e5);return[w+1,[70,80,90,60][w%4]]}
+function vSes(){var c=ciclo();
+ return `<div class='card'><h2>Ciclo de carga</h2><p>Semana ${c[0]}: carga <b class='ok'>${c[1]}%</b>${c[1]==60?' (semana de descarga)':''}. O ciclo repete-se a cada 4 semanas: 70%, 80%, 90% e 60%.</p><button class='b' onclick='S.cfg.carga=${c[1]};sv();draw()'>Aplicar ao plano</button> <button class='g' onclick='S.cfg.ini7="";sv();draw()'>Reiniciar ciclo</button></div>`+
+ `<div class='card'><h2>Temporizador</h2><div id='sesBox'></div><div style='display:flex;gap:8px;margin-top:8px'><button class='b' id='sbtn' style='margin:0' onclick='sesGo()'>${sRun?'Pausar':'Iniciar'}</button><button class='g' onclick='sesSkip()'>Saltar</button></div></div>`+
+ `<div class='card'><h2>Sessões guiadas</h2>${Object.keys(SS).map(function(n){return `<div class='row'><div><b>${n}</b><br><span class='muted'>${sesMin(SS[n])} min</span></div><button class='g' onclick='sesIni("${n}")'>Escolher</button></div>`}).join('')}</div>`}
+
+/* análise */
+function grupo(fn,tit,l){var g={};l.forEach(function(j){var k=fn(j)||'–';(g[k]=g[k]||[]).push(j)});var ks=Object.keys(g);return ks.length?`<h2 style='margin-top:14px'>${tit}</h2>`+ks.map(function(k){var s=stats(g[k]);return `<div class='row'><b>${esc(k)}</b><span class='muted'>${s.j} j · ${s.g} G · ${s.a} A · nota ${s.nn?f1(s.nota):'–'}</span></div>`}).join(''):''}
+function grafico(l){if(l.length<2)return `<p class='muted'>Regista pelo menos 2 jogos para ver o gráfico.</p>`;var W=300,H=110,st=W/l.length,mx=Math.max.apply(0,l.map(function(j){return(j.gols||0)+(j.ass||0)}).concat([1])),
+ b=l.map(function(j,i){var h=((j.gols||0)+(j.ass||0))/mx*60;return `<rect x='${i*st+4}' y='${H-h}' width='${st-8}' height='${h}' rx='3' fill='var(--ac2)' opacity='.7'/>`}).join(''),
+ pt=l.map(function(j,i){return j.nota?[i*st+st/2,H-j.nota/10*H]:null}).filter(Boolean);
+ return `<svg viewBox='0 0 ${W} ${H}' style='width:100%;background:var(--bg);border-radius:10px;border:1px solid var(--bd)'>${b}${pt.length>1?`<polyline fill='none' stroke='var(--ac)' stroke-width='2.5' points='${pt.map(function(p){return p[0]+','+p[1]}).join(' ')}'/>`:''}</svg><p class='muted'>Linha: nota (0 a 10). Barras: golos + assistências.</p>`}
+function vHeat(){return `<svg id='hm' viewBox='0 0 320 210' style='width:100%;border-radius:10px;border:2px solid var(--ac);background:repeating-linear-gradient(90deg,rgba(46,230,122,.08) 0 40px,transparent 40px 80px)' onclick='heatClick(event)'><g stroke='var(--ac)' stroke-width='2' fill='none'><line x1='160' y1='0' x2='160' y2='210'/><circle cx='160' cy='105' r='28'/><rect x='0' y='60' width='40' height='90'/><rect x='280' y='60' width='40' height='90'/></g>${S.heat.map(function(q){return `<circle cx='${q[0]*320}' cy='${q[1]*210}' r='16' fill='var(--bad)' opacity='.14'/>`}).join('')}</svg><p class='muted'><span id='hmn'>${S.heat.length}</span> toques registados. Toca no campo onde tocaste na bola (ataque para a direita).</p><button class='g' onclick='S.heat=[];sv();draw()'>Limpar mapa</button>`}
+function heatClick(e){var s=$('hm'),r=s.getBoundingClientRect(),x=+((e.clientX-r.left)/r.width).toFixed(3),y=+((e.clientY-r.top)/r.height).toFixed(3);S.heat.push([x,y]);s.insertAdjacentHTML('beforeend',`<circle cx='${x*320}' cy='${y*210}' r='16' fill='var(--bad)' opacity='.14'/>`);$('hmn').textContent=S.heat.length;sv()}
+function cartao(){var p=S.perfil,s=stats(S.jogos),c=document.createElement('canvas');c.width=600;c.height=340;var x=c.getContext('2d'),g=x.createLinearGradient(0,0,600,340);g.addColorStop(0,'#066b34');g.addColorStop(1,'#0b1410');x.fillStyle=g;x.fillRect(0,0,600,340);
+ function fim(){x.fillStyle='#fff';x.font='bold 34px sans-serif';x.fillText(p.nome||'Jogador',210,70);x.font='20px sans-serif';x.fillStyle='#2ee67a';x.fillText([p.pos,p.idade?p.idade+' anos':'',p.pe?'Pé '+p.pe.toLowerCase():''].filter(Boolean).join(' · '),210,105);x.fillStyle='#fff';[['Jogos',s.j],['Golos',s.g],['Assist.',s.a],['G/A jogo',f1(s.gapj)]].forEach(function(t,i){x.font='bold 40px sans-serif';x.fillText(t[1],210+i*95,200);x.font='14px sans-serif';x.fillText(t[0],210+i*95,224)});x.fillStyle='#8fa398';x.fillText('FutPro',20,325);c.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='cartao-futpro.png';a.click()})}
+ if(p.foto){var im=new Image();im.onload=function(){var w=Math.min(im.width,im.height);x.save();x.beginPath();x.arc(105,120,80,0,7);x.clip();x.drawImage(im,(im.width-w)/2,(im.height-w)/2,w,w,25,40,160,160);x.restore();fim()};im.src=p.foto}else fim()}
+function partilhar(){var p=S.perfil,s=stats(S.jogos),t='FutPro · '+(p.nome||'Jogador')+' · '+[p.pos,p.idade?p.idade+' anos':'',p.pais].filter(Boolean).join(' · ')+'\nJogos '+s.j+' · Golos '+s.g+' · Assist. '+s.a+' · G/A por jogo '+f1(s.gapj)+(s.nn?' · Nota '+f1(s.nota):'');if(navigator.share)navigator.share({text:t}).catch(function(){});else if(navigator.clipboard){navigator.clipboard.writeText(t);alert('Resumo copiado.')}else prompt('Copia o resumo:',t)}
+function vEst(){var all=S.jogos.concat(S.zona).filter(function(j){return j.jogado}).sort(function(a,b){return new Date(a.data)-new Date(b.data)}),u=S.jogos.filter(function(j){return j.jogado}).slice(-5),pm=u.length?Math.round(med7(u.map(function(j){return+j.min||0}))):0;
+ return `<div class='card'><h2>Análise de desempenho</h2>${stHtml(stats(S.jogos))}<p class='muted'>${pm?'Minutos esperados no próximo jogo: '+pm+' (média dos últimos '+u.length+' jogos).':'Regista jogos para prever os minutos.'}</p></div>`+
+ `<div class='card'><h2>Evolução</h2>${grafico(all.slice(-20))}${grupo(function(j){return j.comp},'Por competição',all)}${grupo(function(j){return j.adv},'Por adversário',all)}${grupo(function(j){var c=S.clubes.filter(function(x){return x.id==j.club})[0];return(c?c.nome:'Zona')+' · '+new Date(j.data).getFullYear()},'Histórico por clube e época',all)}</div>`+
+ `<div class='card'><h2>Mapa de calor</h2>${vHeat()}</div><div class='card'><h2>Cartão e partilha</h2><button class='b' onclick='cartao()'>Descarregar cartão do jogador</button> <button class='g' onclick='partilhar()'>Partilhar resumo</button></div>`}
+
+/* quadro tático */
+var FM={'4-3-3':[[6,50],[22,15],[20,38],[20,62],[22,85],[42,30],[40,50],[42,70],[68,18],[72,50],[68,82]],'4-4-2':[[6,50],[22,15],[20,38],[20,62],[22,85],[45,15],[42,38],[42,62],[45,85],[70,38],[70,62]],'3-5-2':[[6,50],[22,25],[20,50],[22,75],[40,10],[42,30],[40,50],[42,70],[40,90],[70,38],[70,62]]};
+function tPos(){return S.tat.p[S.tat.f]||FM[S.tat.f]}
+function tFm(k){S.tat.f=k;sv();draw()}
+function vTat(){var f=S.tat.f;return `<div class='card'><h2>Quadro tático</h2><div style='display:flex;gap:6px;margin-bottom:8px'>${Object.keys(FM).map(function(k){return `<button class='g' style='${k==f?'background:var(--ac);color:#04210f;border-color:var(--ac)':''}' onclick='tFm("${k}")'>${k}</button>`}).join('')}<button class='g' onclick='delete S.tat.p[S.tat.f];sv();draw()'>Repor</button></div><svg id='tq' viewBox='0 0 320 210' style='width:100%;border-radius:10px;border:2px solid var(--ac);touch-action:none;background:repeating-linear-gradient(90deg,rgba(46,230,122,.08) 0 40px,transparent 40px 80px)'><g stroke='var(--ac)' stroke-width='2' fill='none'><line x1='160' y1='0' x2='160' y2='210'/><circle cx='160' cy='105' r='28'/><rect x='0' y='60' width='40' height='90'/><rect x='280' y='60' width='40' height='90'/></g>${tPos().map(function(q,i){return `<circle data-i='${i}' cx='${q[0]*3.2}' cy='${q[1]*2.1}' r='11' fill='${i?'var(--ac)':'var(--ac2)'}' stroke='#fff' stroke-width='1.5'/>`}).join('')}</svg><p class='muted'>Arrasta os jogadores. A baliza fica à esquerda.</p></div>`}
+function tInit(){var s=$('tq');if(!s)return;var d=null;
+ s.addEventListener('pointerdown',function(e){if(e.target.getAttribute('data-i')!=null){d=e.target;s.setPointerCapture(e.pointerId)}});
+ s.addEventListener('pointermove',function(e){if(!d)return;var q=s.createSVGPoint();q.x=e.clientX;q.y=e.clientY;q=q.matrixTransform(s.getScreenCTM().inverse());d.setAttribute('cx',Math.max(8,Math.min(312,q.x)));d.setAttribute('cy',Math.max(8,Math.min(202,q.y)))});
+ s.addEventListener('pointerup',function(){if(!d)return;var P=tPos().map(function(a){return a.slice()});P[+d.getAttribute('data-i')]=[d.getAttribute('cx')/3.2,d.getAttribute('cy')/2.1];S.tat.p[S.tat.f]=P;sv();d=null})}
+
+/* biblioteca */
+function porPos(m){var x=S.perfil.pos||'';for(var i=0;i<m.length;i++)if(m[i][0].test(x))return m[i][1];return m[m.length-1][1]}
+function vBib(){var mv=porPos([[/Guarda/,'Posiciona-te 2 a 5 m fora da linha de golo e ajusta a cada passe'],[/central/,'Acompanha o avançado e fecha a diagonal do passe'],[/Lateral/,'Sobe em ultrapassagem quando o extremo recebe por dentro'],[/defensivo/,'Oferece-te entre linhas, a 10 m do central'],[/centro/,'Triangula com 2 colegas a 8 a 12 m'],[/ofensivo/,'Procura o espaço entre o médio e o central adversário'],[/Extremo/,'Ataca as costas do lateral em diagonal'],[/./,'Faz o movimento de rutura 1 s antes do passe']]),
+ pv=porPos([[/Guarda/,'Ombros e punhos: 2 × 12 rotações com elástico'],[/central/,'Posteriores da coxa: 3 × 6 nórdicos'],[/Lateral|Extremo/,'Adutores: 3 × 30 s de prancha lateral e sprints progressivos'],[/Médio/,'Tornozelo: 2 × 20 s de equilíbrio num pé'],[/./,'Posteriores e glúteos: 3 × 8 pontes de uma perna']]),
+ B=[['Passe',['Rasteiro com o interior: 5 a 20 m, pé de apoio ao lado da bola, olhar para o colega antes e depois','Longo com o peito do pé: 30 a 50 m, corpo atrás da bola, acompanha com a perna','Em profundidade: no espaço à frente do colega, 10 a 25 m, quando ele arranca','De primeira: quando há pressão a menos de 2 m. Treino: 5 × 20 passes com cada pé']],
+ ['Remate',['Peito do pé (potência): dentro da área, pé de apoio ao lado da bola, tornozelo firme','Colocado com o interior: de 12 a 20 m, para os cantos','De fora da área: só com linha livre; 3 × 10 remates por sessão','De cabeça: ataca a bola com a testa, salto com impulso de 2 passos']],
+ ['Cruzamento e cabeceamento',['Cruzamento: levanta a cabeça e escolhe 1.º poste, 2.º poste ou entrada da área (3 alvos × 10)','Cabeceamento: ataca a bola, contacto com a testa, pescoço firme; 4 × 8']],
+ ['Desarme e posicionamento',['Mantém 1,5 m do adversário, corpo de lado, peso na frente do pé','Só desarmas se ganhas a bola; senão fecha o espaço e espera ajuda','Entre linhas defensivas, no máximo 10 m']],
+ ['Para a tua posição',['Movimento sem bola: '+mv,'Prevenção de lesões: '+pv,'Ao ver jogadores da tua posição, observa 5 coisas: onde se posicionam sem bola, 1.º toque, como pedem a bola, decisão sob pressão e reação ao perder a bola']],
+ ['Receitas baratas',['Xima com peixe frito e couve: 150 g farinha de milho, 150 g peixe, 100 g couve (≈ 600 kcal)','Papa de milho com amendoim e banana: 60 g farinha, 30 g amendoim, 1 banana (≈ 450 kcal)','Arroz com feijão e ovos: 100 g arroz, 80 g feijão, 2 ovos, 1 tomate (≈ 650 kcal)','Matapa com arroz: 100 g arroz, 150 g folhas de mandioca, 30 g amendoim moído (≈ 550 kcal)']],
+ ['Lista de compras (7 dias)',['Arroz 1,5 kg · feijão 1 kg · farinha de milho 1 kg','Ovos 30 · peixe 2 kg · frango 1 kg','Banana 14 · legumes e folhas 3 kg · tomate 1 kg','Amendoim 500 g · óleo 0,5 L · leite 3,5 L · água 14 L']]];
+ return B.map(function(b){return `<div class='card'><h2>${b[0]}</h2><ul>${b[1].map(function(x){return '<li>'+esc(x)+'</li>'}).join('')}</ul></div>`}).join('')}
+
+/* definições, lembretes e tema */
+function aplicaTema(){var t=S.cfg.tema;if(t)document.documentElement.setAttribute('data-theme',t);else document.documentElement.removeAttribute('data-theme')}
+var lemT=[];
+function lemAgendar(){lemT.forEach(clearTimeout);lemT=[];if(!S.cfg.lem||!('Notification' in window)||Notification.permission!='granted')return;var n=new Date(),agora=n.getHours()*60+n.getMinutes(),hj=iso7(n),al=[];
+ S.rotina.forEach(function(r){if(!r.data||r.data==hj)al.push([t2m(r.ini),r.nome])});for(var h=8;h<=20;h+=2)al.push([h*60,'Bebe 300 ml de água']);
+ (S.reg.cns||[]).forEach(function(e){if(e.d==hj&&e.hr)al.push([t2m(e.hr),e.o])});
+ al.forEach(function(a){var ms=(a[0]-agora)*60000;if(ms>0)lemT.push(setTimeout(function(){try{new Notification('FutPro',{body:a[1]})}catch(e){}},ms))})}
+function lemAtivar(){if(!('Notification' in window)){alert('Este navegador não suporta notificações.');return}Notification.requestPermission().then(function(r){S.cfg.lem=r=='granted';sv();lemAgendar();draw()})}
+function vCfg(){return `<div class='card'><h2>Aparência</h2>${Sx('Tema','tm',[['','Automático'],['light','Claro'],['dark','Escuro']],S.cfg.tema||'').replace('<select','<select onchange="S.cfg.tema=this.value;sv();aplicaTema()"')}</div>`+
+ `<div class='card'><h2>Lembretes</h2><p class='muted'>Avisam das atividades da rotina, de 2 em 2 horas para beber água e das consultas do dia. Só funcionam com a app aberta.</p><button class='b' onclick='lemAtivar()'>${S.cfg.lem?'Lembretes ativos':'Ativar lembretes'}</button></div>`+
+ `<div class='card'><h2>Partilha e dados</h2><button class='b' onclick='partilhar()'>Partilhar resumo</button> <button class='g' onclick='exp()'>Exportar dados</button> <button class='g' onclick='imp()'>Importar</button></div>`}
+
+/* metas: plano semanal, progresso e véspera */
+var vM0=vMetas;vMetas=function(){return vM0()+metaExtra()};
+var aM0=addMeta;addMeta=function(){var n=S.metas.length;aM0();if(S.metas.length>n){S.metas[S.metas.length-1].criada=Date.now();sv()}};
+function chkT(k){S.chk[k]=!S.chk[k];sv()}
+function metaExtra(){var m=proxMeta();if(!m)return'';var dm=(new Date(m.data)-new Date())/864e5,w=Math.max(1,Math.ceil(dm/7)),pc=m.criada?Math.min(100,Math.round((Date.now()-m.criada)/(new Date(m.data)-m.criada)*100)):0,rows=[];
+ for(var i=1;i<=w;i++)if(i<=8||i==w){var d=new Date(Date.now()+(i-1)*6048e5);rows.push(`<div class='row'><b>Semana ${i} · ${d.getDate()}/${d.getMonth()+1}</b><span class='muted'>carga ${i==w?60:[70,80,90,60][(i-1)%4]}% · ${fase(Math.max(0,dm-(i-1)*7))}</span></div>`)}
+ return `<div class='card'><h2>Plano até ${esc(m.nome)}</h2>${m.criada?`<div class='bar' style='height:12px'><i style='left:0;width:${pc}%;background:var(--ac)'></i></div><p class='muted'>${pc}% do tempo até à meta já passou</p>`:''}${rows.join('')}</div>`+
+ `<div class='card'><h2>Checklist da véspera</h2>${['Dormir 9 h na noite anterior','Mala pronta: chuteiras, caneleiras, 2 camisolas, documentos','Refeição leve 3 h antes, com hidratos e pouca gordura','2 L de água no dia anterior','Chegar 60 min antes','Aquecimento de 20 min'].map(function(t,i){var k=m.id+i;return `<label style='display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px'><input type='checkbox' style='width:auto' ${S.chk[k]?'checked':''} onchange='chkT("${k}")'>${t}</label>`}).join('')}</div>`}
+
+var MY={reg:vReg,ses:vSes,est:vEst,tat:vTat,bib:vBib,cfg:vCfg},draw2=draw;
+draw=function(){if(tab!='ses'){clearInterval(sesTm);sRun=false}if(MY[tab]){clearInterval(tm);if(typeof mqRaf!='undefined')cancelAnimationFrame(mqRaf);$('v').innerHTML=MY[tab]();if(tab=='ses')sesRender();if(tab=='tat')tInit()}else draw2();lemAgendar()};
+TABS.push(['reg','Registos'],['ses','Sessões'],['est','Análise'],['tat','Tática'],['bib','Biblioteca'],['cfg','Definições']);
+aplicaTema();nav();draw();
+/* ===== v8: reflexos, aceleração, drible e força + treino por posição específica ===== */
+['ref','ace','dri','forca'].forEach(function(k){if(S.perfil.at[k]==null)S.perfil.at[k]=5});
+/* posição: [funções, foco físico, exercícios[nome, prescrição, o que treina, índice do manequim ou -1]] */
+var POSF={
+'Guarda-redes':['Defender a baliza, sair a cruzamentos, distribuir com os pés e comandar a defesa','Reflexos, potência de salto e mobilidade lateral',[['Reflexos com bola de ténis','4 × 12 por mão','defesas a curta distância',-1],['Queda lateral e salto','4 × 6 por lado','defesas aos cantos',-1],['Saídas a cruzamentos','4 × 8','jogo aéreo e coragem',-1],['Distribuição com o pé','4 × 10 passes de 30 m','reposição de bola',-1],['Agachamento','4 × 15','potência das pernas',0]]],
+'Defesa central':['Marcar o avançado, ganhar bolas aéreas, cobrir os colegas e iniciar a construção','Força, impulsão e velocidade de reação',[['Duelos aéreos','4 × 8','ganhar bolas altas',-1],['Desarme 1x1','4 × 6','travar o avançado',-1],['Saída de bola com os dois pés','5 × 10 passes','construção do jogo',-1],['Agachamento','4 × 15','força de pernas',0],['Prancha','3 × 45 s','força do tronco',3]]],
+'Lateral direito':['Defender o corredor direito, subir em ultrapassagem, cruzar e dar largura','Resistência de velocidade e aceleração',[['Sprints de ultrapassagem','8 × 70 m','subir pelo corredor',7],['Cruzamentos com o pé direito','20 por sessão','cruzar da linha de fundo',-1],['Recuperação defensiva','6 × 30 m de costas','voltar a defender',-1],['Afundo','3 × 12 por perna','força e equilíbrio no 1x1',1]]],
+'Lateral esquerdo':['Defender o corredor esquerdo, subir em ultrapassagem, cruzar e dar largura','Resistência de velocidade e aceleração',[['Sprints de ultrapassagem','8 × 70 m','subir pelo corredor',7],['Cruzamentos com o pé esquerdo','20 por sessão','cruzar da linha de fundo',-1],['Recuperação defensiva','6 × 30 m de costas','voltar a defender',-1],['Afundo','3 × 12 por perna','força e equilíbrio no 1x1',1]]],
+'Médio defensivo':['Proteger a defesa, recuperar bolas, distribuir o jogo e cobrir espaços','Resistência, força e capacidade de duelo',[['Deslocação lateral e cobertura','6 × 20 m','fechar linhas de passe',-1],['Desarme e recuperação de bola','4 × 8','roubar a bola',-1],['Passe longo de mudança de flanco','20 por sessão','distribuição',-1],['Prancha','3 × 45 s','força do tronco nos duelos',3]]],
+'Médio centro':['Ligar defesa e ataque, apoiar nas duas áreas e controlar o ritmo do jogo','Resistência aeróbia e coordenação',[['Rondos 5 contra 2','6 × 3 min','passe sob pressão',-1],['Passes curtos de primeira','5 × 20','circulação rápida',-1],['Corrida no lugar','5 × 30 s','resistência box-to-box',7],['Elevação de joelhos','4 × 30 s','coordenação e ritmo',6]]],
+'Médio ofensivo':['Criar jogo, dar o último passe, rematar de fora e desmarcar-se entre linhas','Agilidade e aceleração curta',[['Último passe em profundidade','5 × 10','criar a ocasião',-1],['Remate de fora da área','3 × 10','finalizar de longe',8],['Drible curto em cones','4 × 10','desmarcar-se entre linhas',-1],['Elevação de joelhos','4 × 30 s','agilidade',6]]],
+'Extremo direito':['Vencer o 1x1, dar largura, cruzar, finalizar em diagonal e recuar para ajudar','Velocidade máxima, aceleração e resistência de sprints',[['Sprints de 30 m','8 × 30 m','explosão no 1x1',7],['1x1 ofensivo com cones','4 × 8','vencer o lateral',-1],['Cruzamento e remate em diagonal','3 × 10','finalizar de fora para dentro',8],['Afundo','3 × 12 por perna','potência de arranque',1]]],
+'Extremo esquerdo':['Vencer o 1x1, dar largura, cruzar, finalizar em diagonal e recuar para ajudar','Velocidade máxima, aceleração e resistência de sprints',[['Sprints de 30 m','8 × 30 m','explosão no 1x1',7],['1x1 ofensivo com cones','4 × 8','vencer o lateral',-1],['Cruzamento e remate em diagonal','3 × 10','finalizar de fora para dentro',8],['Afundo','3 × 12 por perna','potência de arranque',1]]],
+'Avançado':['Finalizar, desmarcar-se, segurar a bola de costas e pressionar a saída adversária','Força de arranque, potência e velocidade',[['Remates','30 por sessão','finalização',8],['Desmarcação e rutura sem bola','6 × 6','ganhar as costas da defesa',-1],['Jogo de costas e proteção','4 × 45 s','segurar a bola',-1],['Cabeceamento','4 × 8','finalizar de cabeça',-1],['Ponte de glúteos','3 × 15','força de arranque',5]]]};
+
+/* os exercícios recomendados e o foco do plano passam a usar a principal e as secundárias */
+rec=function(pos){var o=[];[pos].concat(S.perfil.sec||[]).forEach(function(x){(POSF[x]?POSF[x][2]:[]).forEach(function(d){if(d[3]>=0&&o.indexOf(d[3])<0)o.push(d[3])})});return o.length?o:[0,1,2]};
+foco=function(x){var m=POSF[x];if(!m)return 'técnica geral';var t=m[2].slice(0,3).map(function(d){return d[0].toLowerCase()+' '+d[1]}).join(', '),s=(S.perfil.sec||[]).filter(function(y){return POSF[y]}).slice(0,2).map(function(y){return POSF[y][2][0][0].toLowerCase()+' ('+y.toLowerCase()+')'});return t+(s.length?' · secundárias: '+s.join(', '):'')};
+
+/* sugestão de posições com os 10 atributos */
+var svP0=svP;svP=function(){['ref','ace','dri','forca'].forEach(function(k){var e=$('at_'+k);if(e)S.perfil.at[k]=+e.value||5});svP0()};
+sugerir=function(){svP();var p=S.perfil,a=p.at,al=+p.alt||175,lt=p.pe=='Esquerdo'?'esquerdo':'direito',
+ W={'Guarda-redes':[['ref',3],['aer',1.5],['pas',.5],['def',.5]],'Defesa central':[['def',2.5],['forca',2],['aer',1.5],['pas',.5]],'Lateral':[['vel',2],['res',2],['ace',1.5],['def',1],['dri',.5],['pas',.5]],'Médio defensivo':[['def',2],['pas',1.5],['res',1.5],['forca',1.5]],'Médio centro':[['pas',2],['res',2],['dri',1],['def',.8],['fin',.3]],'Médio ofensivo':[['pas',2],['dri',2],['fin',1.5],['ace',.5]],'Extremo':[['vel',2],['ace',2],['dri',2.5],['fin',1],['pas',.5]],'Avançado':[['fin',3],['forca',1.2],['ace',1],['aer',1],['dri',.5],['vel',.5]]},
+ base=function(n){return n.replace(/ (direito|esquerdo)$/,'')},L=[];
+ Object.keys(W).forEach(function(n){var s=0,mx=0;W[n].forEach(function(x){s+=(a[x[0]]||5)*x[1];mx+=10*x[1]});var b=n=='Guarda-redes'?(al-175)/10:n=='Defesa central'?(al-175)/12:0,pc=Math.max(0,Math.min(100,s/mx*100+b*5));
+  if(n=='Lateral'||n=='Extremo')['direito','esquerdo'].forEach(function(l){L.push([n+' '+l,pc+(l==lt?2:0)])});else L.push([n,pc])});
+ L.sort(function(x,y){return y[1]-x[1]});p.pos=L[0][0];p.sec=L.slice(1).filter(function(x){return base(x[0])!=base(p.pos)}).slice(0,3).map(function(x){return x[0]});p.lado=ladoDe(p.pos);p.rank=L.filter(function(x,i){return i==0||base(x[0])!=base(L[i-1][0])||x[0]!=L[i-1][0]}).slice(0,6).map(function(x){return[x[0],Math.round(x[1])]});sv();draw()};
+var vP0=vPerfil;vPerfil=function(){var a=S.perfil.at,L={ref:'Reflexos',ace:'Aceleração',dri:'Drible',forca:'Força'},r=S.perfil.rank||[],
+ c=`<div class="card"><h2>Atributos extras</h2><p class="muted">Reflexos, aceleração, drible e força entram na sugestão, junto com os outros 6 atributos.</p><div class="grid">${Object.keys(L).map(function(k){return `<div><label>${L[k]}: <b id="v_${k}">${a[k]}</b></label><input id="at_${k}" type="range" min="1" max="10" value="${a[k]}" oninput="$('v_${k}').textContent=this.value"></div>`}).join('')}</div><button class="b" onclick="svP()">Guardar</button> <button class="b" style="background:var(--ac2)" onclick="sugerir()">Sugerir posições</button>${r.length?`<h2 style="margin-top:14px">Compatibilidade com as posições</h2>${r.map(function(x){return `<div style="margin:6px 0"><span class="muted">${esc(x[0])} · ${x[1]}%</span><div class="bar" style="height:10px"><i style="left:0;width:${x[1]}%;background:var(--ac)"></i></div></div>`}).join('')}`:''}</div>`;
+ return vP0().replace('<div class="card"><h2>Saúde</h2>',c+'<div class="card"><h2>Saúde</h2>')};
+
+/* nova aba: treino da posição principal e das secundárias */
+function goEx(i){exSel=i;pausa=false;go('ex')}
+function drl(d){return `<div class='row'><div><b>${d[0]}</b> <span class='tag'>${d[1]}</span><br><span class='muted'>Treina: ${d[2]}</span></div>${d[3]>=0&&typeof EX!='undefined'?`<button class='g' onclick='goEx(${d[3]})'>Ver manequim</button>`:''}</div>`}
+function vPex(){var p=S.perfil;if(!p.pos||!POSF[p.pos])return `<div class='card'><p>Escolhe a posição no Perfil, ou toca em Sugerir posições, para ver os exercícios e as funções dela.</p></div>`;
+ var m=POSF[p.pos],sec=(p.sec||[]).filter(function(x){return POSF[x]}).slice(0,2),nx=typeof proxJ=='function'?proxJ():null,jg=nx&&nx.posJ&&nx.posJ!=p.pos&&POSF[nx.posJ]?nx:null,
+ h=`<div class='card'><h2>${esc(p.pos)} · posição principal</h2><p><b>Funções:</b> ${m[0]}</p><p><b>Foco físico:</b> ${m[1]}</p>${m[2].map(drl).join('')}</div>`;
+ sec.forEach(function(x,i){var s=POSF[x];h+=`<div class='card'><h2>${esc(x)} · secundária ${i+1}</h2><p><b>Funções:</b> ${s[0]}</p>${s[2].slice(0,3).map(drl).join('')}</div>`});
+ if(jg){var hn=(new Date(jg.data)-new Date())/36e5,s=POSF[jg.posJ];h+=`<div class='card'><h2>Vais jogar de ${esc(jg.posJ)} contra ${esc(jg.adv)} em ${Math.floor(hn/24)} d ${Math.round(hn%24)} h</h2><p><b>Funções:</b> ${s[0]}</p>${s[2].slice(0,3).map(drl).join('')}</div>`}
+ return h+`<div class='card'><h2>Divisão do treino técnico (60 min)</h2><p>${jg?'30 min '+esc(jg.posJ)+' (jogo) · 30 min '+esc(p.pos):'36 min '+esc(p.pos)+(sec[0]?' · 15 min '+esc(sec[0]):'')+(sec[1]?' · 9 min '+esc(sec[1]):'')}</p></div>`}
+if(typeof MY!='undefined')MY.pex=vPex;
+TABS.splice(1,0,['pex','Posição']);
+nav();draw();
+nav();draw();if(S.perfil.nome)$("ttl").firstChild.nodeValue=S.perfil.nome;
+</script>
+</body>
+</html>
